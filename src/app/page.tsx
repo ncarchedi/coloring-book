@@ -4,9 +4,11 @@ import { useState, useCallback } from "react";
 import { jsPDF } from "jspdf";
 import { PhotoUpload } from "@/components/photo-upload";
 import { AgeSelector } from "@/components/age-selector";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Download, FileDown, Loader2 } from "lucide-react";
 
 interface ColoringPage {
   image: string;
@@ -97,35 +99,49 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-background px-4 py-12">
-      <main className="w-full max-w-2xl space-y-8">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">
+    <div className="flex min-h-screen items-start justify-center bg-background px-4 py-8 sm:py-12">
+      <main className="w-full max-w-2xl space-y-6 sm:space-y-8">
+        {/* Header */}
+        <header className="relative space-y-1 text-center">
+          <div className="absolute right-0 top-0">
+            <ThemeToggle />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Coloring Book Generator
           </h1>
-          <p className="text-muted-foreground">
-            Upload a family photo and turn it into a coloring page
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+            Upload a family photo and we&apos;ll turn it into an age-appropriate coloring page
           </p>
+        </header>
+
+        {/* Upload + Age */}
+        <div className="space-y-4 sm:space-y-6">
+          <PhotoUpload photo={photo} onPhotoChange={setPhoto} />
+          <AgeSelector age={age} onAgeChange={setAge} />
         </div>
 
-        <PhotoUpload photo={photo} onPhotoChange={setPhoto} />
-        <AgeSelector age={age} onAgeChange={setAge} />
-
+        {/* Generate Button */}
         <Button
-          className="w-full"
+          className="w-full transition-all duration-200"
           size="lg"
           disabled={!photo || generating}
           onClick={handleGenerate}
         >
-          {generating
-            ? "Generating…"
-            : pages.length === 0
-              ? "Generate Coloring Page"
-              : "Generate Another Variation"}
+          {generating ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Generating&hellip;
+            </>
+          ) : pages.length === 0 ? (
+            "Generate Coloring Page"
+          ) : (
+            "Generate Another Variation"
+          )}
         </Button>
 
+        {/* Loading Skeleton */}
         {generating && (
-          <Card>
+          <Card className="animate-in fade-in duration-300">
             <CardContent className="p-6 space-y-4">
               <Skeleton className="h-6 w-3/4 mx-auto" />
               <Skeleton className="aspect-square w-full rounded-lg" />
@@ -133,40 +149,51 @@ export default function Home() {
           </Card>
         )}
 
+        {/* Error */}
         {error && (
-          <Card className="border-destructive">
+          <Card className="border-destructive animate-in fade-in duration-300">
             <CardContent className="p-6">
               <p className="text-destructive text-center text-sm">{error}</p>
             </CardContent>
           </Card>
         )}
 
+        {/* Results */}
         {pages.length > 0 && !generating && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 {pages.length} page{pages.length !== 1 ? "s" : ""} generated
                 {selectedPages.length > 0 && selectedPages.length < pages.length
-                  ? ` · ${selectedPages.length} selected for export`
+                  ? ` · ${selectedPages.length} selected`
                   : ""}
               </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                  Export PDF{selectedPages.length > 0 && selectedPages.length < pages.length
-                    ? ` (${selectedPages.length})`
-                    : ""}
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportPdf}
+                className="transition-all duration-200"
+              >
+                <FileDown className="size-4" />
+                Export PDF
+                {selectedPages.length > 0 && selectedPages.length < pages.length
+                  ? ` (${selectedPages.length})`
+                  : ""}
+              </Button>
             </div>
 
-            <div className={`grid gap-4 ${pages.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            <div
+              className={`grid gap-3 sm:gap-4 ${
+                pages.length === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
+              }`}
+            >
               {pages.map((page, index) => (
                 <Card
                   key={index}
-                  className={`cursor-pointer transition-all ${
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                     page.selected
                       ? "ring-2 ring-primary"
-                      : "opacity-60"
+                      : "opacity-60 hover:opacity-80"
                   }`}
                   onClick={() => togglePageSelection(index)}
                 >
@@ -186,8 +213,10 @@ export default function Home() {
                         size="sm"
                         asChild
                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        className="transition-colors duration-200"
                       >
                         <a href={page.image} download={`coloring-page-${index + 1}.png`}>
+                          <Download className="size-3" />
                           PNG
                         </a>
                       </Button>
@@ -198,6 +227,13 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Footer */}
+        <footer className="pt-4 pb-2 text-center">
+          <p className="text-xs text-muted-foreground/60">
+            Powered by OpenAI &middot; Photos are never stored
+          </p>
+        </footer>
       </main>
     </div>
   );

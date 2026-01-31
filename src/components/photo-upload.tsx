@@ -83,10 +83,10 @@ export function PhotoUpload({ photo, onPhotoChange }: PhotoUploadProps) {
 
   return (
     <Card
-      className={`cursor-pointer transition-colors ${
+      className={`cursor-pointer transition-all duration-200 ${
         isDragging
-          ? "border-primary bg-primary/5"
-          : "border-dashed hover:border-primary/50"
+          ? "border-primary bg-primary/5 scale-[1.01]"
+          : "border-dashed hover:border-primary/50 hover:shadow-sm"
       }`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
