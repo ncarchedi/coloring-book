@@ -79,3 +79,16 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - `stopPropagation` on nested buttons inside clickable cards prevents toggle on download click
   - Max width bumped from max-w-xl to max-w-2xl to accommodate 2-column grid
 ---
+
+## 2026-01-31 - US-008
+- Added dark/light mode toggle using next-themes + ThemeProvider
+- Added subtle transitions (fade-in animations, hover shadows, duration-200 transitions)
+- Added Loader2 spinner icon on generate button, Download/FileDown icons on action buttons
+- Mobile-responsive: single-column grid on mobile, responsive spacing (sm: breakpoints)
+- Updated metadata title/description, added footer with privacy note
+- Files changed: src/components/theme-provider.tsx (new), src/components/theme-toggle.tsx (new), src/app/layout.tsx, src/app/page.tsx, src/components/photo-upload.tsx, package.json
+- **Learnings for future iterations:**
+  - `useSyncExternalStore` with server=false / client=true avoids the lint error from setState-in-useEffect for hydration guards
+  - next-themes requires `suppressHydrationWarning` on `<html>` and `attribute="class"` for Tailwind dark mode
+  - tw-animate-css provides `animate-in fade-in` classes out of the box
+---

@@ -133,7 +133,7 @@
         "Verify in browser via Playwright MCP: full user flow works, dark/light mode toggles, responsive layout on mobile viewport"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
