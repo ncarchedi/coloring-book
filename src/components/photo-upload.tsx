@@ -58,25 +58,25 @@ export function PhotoUpload({ photo, onPhotoChange }: PhotoUploadProps) {
 
   if (photo) {
     return (
-      <Card>
-        <CardContent className="relative">
+      <Card className="relative overflow-hidden py-0">
+        <CardContent className="p-0">
           <img
             src={photo}
             alt="Uploaded photo"
-            className="w-full rounded-lg object-contain max-h-80"
+            className="w-full rounded-xl object-contain max-h-80"
           />
-          <Button
-            variant="destructive"
-            size="icon"
-            className="absolute top-2 right-2"
-            onClick={() => {
-              onPhotoChange(null);
-              if (inputRef.current) inputRef.current.value = "";
-            }}
-          >
-            <X className="size-4" />
-          </Button>
         </CardContent>
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-2 right-2"
+          onClick={() => {
+            onPhotoChange(null);
+            if (inputRef.current) inputRef.current.value = "";
+          }}
+        >
+          <X className="size-4" />
+        </Button>
       </Card>
     );
   }
