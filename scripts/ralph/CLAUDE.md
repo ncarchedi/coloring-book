@@ -60,7 +60,7 @@ Before committing, add genuinely reusable knowledge to nearby CLAUDE.md files (A
 
 ### Test Fixtures
 
-A test image is available at `scripts/ralph/fixtures/remy.JPG`. Use this image for end-to-end browser testing (uploading a photo, generating coloring pages, downloading/exporting). This allows full verification of the pipeline without requiring manual intervention.
+A test image is available at `scripts/ralph/fixtures/test.JPG`. Use this image for end-to-end browser testing (uploading a photo, generating coloring pages, downloading/exporting). This allows full verification of the pipeline without requiring manual intervention.
 
 ### Browser Testing with Playwright MCP
 
@@ -68,7 +68,7 @@ A Playwright MCP server is configured for this project. After implementing a UI 
 
 1. Make sure the dev server is running (`npm run dev`)
 2. Use the Playwright MCP tools to navigate to `http://localhost:3000`
-3. Upload the test image at `scripts/ralph/fixtures/remy.JPG` to exercise the full flow
+3. Upload the test image at `scripts/ralph/fixtures/test.JPG` to exercise the full flow
 4. Verify the acceptance criteria visually — check that components render, interactions work, and the layout looks correct
 5. Take a screenshot and note the result in your progress report
 6. If something looks broken, fix it before committing
