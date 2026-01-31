@@ -159,6 +159,34 @@
       "priority": 9,
       "passes": true,
       "notes": "This is a QA-only story. Use Playwright MCP for all browser interactions. If the OpenAI API call takes too long or fails due to no real API key, verify everything up to the Generate button click and note the API dependency."
+    },
+    {
+      "id": "US-010",
+      "title": "Use original image as reference for coloring page generation",
+      "description": "As a parent, I want the coloring page to closely match my uploaded photo's composition and details, not just a text summary of it.",
+      "acceptanceCriteria": [
+        "Pass the original uploaded image directly to gpt-image-1 as a reference image (via the `image` parameter)",
+        "Keep the GPT-4o vision description as supplementary context in the prompt",
+        "Generated coloring pages should visually match the composition, poses, and key details of the original photo",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: upload test image, generate coloring page, confirm output more closely resembles the original photo"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Currently the pipeline loses detail by converting the photo to a 2-3 sentence text description before generating. Passing the image directly as a reference to gpt-image-1 preserves composition and details."
+    },
+    {
+      "id": "US-011",
+      "title": "Fix position of remove-image button on upload preview",
+      "description": "As a user, I want the red X button that removes the uploaded image to be positioned flush in the top-right corner of the preview area.",
+      "acceptanceCriteria": [
+        "The remove-image button is positioned at the top-right corner of the image preview container",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: upload an image and confirm the X button sits in the top-right corner"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Currently the X button appears weirdly positioned — it should be pinned to the top-right of the preview with appropriate padding so it looks natural."
     }
   ]
 }

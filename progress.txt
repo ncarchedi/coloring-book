@@ -1,0 +1,18 @@
+## Codebase Patterns
+
+- **OpenAI image edit API**: Use `openai.images.edit()` with the `image` parameter (as `Uploadable`) to pass reference images to gpt-image-1. Use `toFile()` from the openai SDK to convert a Buffer to an Uploadable. This preserves composition better than text-only prompts.
+- **Base64 to Uploadable**: `const buf = Buffer.from(base64Data, "base64"); const file = await toFile(buf, "photo.jpg", { type: "image/jpeg" });`
+
+---
+
+## 2026-01-31 - US-010
+- Switched from `openai.images.generate()` to `openai.images.edit()` to pass the original uploaded photo as a reference image to gpt-image-1
+- GPT-4o vision description is kept as supplementary context in the prompt
+- Updated prompt to emphasize preserving composition, poses, and key details from the original photo
+- Files changed: `src/app/api/generate/route.ts`
+- **Learnings for future iterations:**
+  - The OpenAI `images.edit` endpoint accepts an `image` parameter (Uploadable or array) for reference images with gpt-image-1
+  - Use `toFile()` from the `openai` package to convert a Buffer into an Uploadable
+  - The `images.edit` endpoint supports the same `quality` and `size` params as `images.generate`
+  - Cannot verify actual generation output without a real API key; verified build, lint, and UI flow pass
+---
