@@ -42,3 +42,13 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Result image stored as data URL in state — will be needed for US-005 (PNG download) and US-006 (PDF export)
   - All generation state (generating, result, error) lives in page.tsx
 ---
+
+## 2026-01-31 - US-005
+- Added Download PNG button below the generated coloring page image
+- Uses shadcn Button with `asChild` wrapping an `<a>` tag with `download` attribute
+- Filename: coloring-page.png
+- Files changed: src/app/page.tsx (added download button in result card)
+- **Learnings for future iterations:**
+  - Result is already a data URL, so `<a href={dataUrl} download="name.png">` works directly — no conversion needed
+  - `asChild` on shadcn Button lets you render as an anchor while keeping button styling
+---
