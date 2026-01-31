@@ -1,0 +1,106 @@
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
+
+function getComplexityPrompt(age: number): string {
+  if (age <= 4) {
+    return "very simple coloring page for toddlers: large bold outlines, thick lines, very few elements, big simple shapes, no fine detail";
+  }
+  if (age <= 7) {
+    return "medium complexity coloring page for young children: moderate detail, clear outlines, some smaller elements but still easy to color, medium-thick lines";
+  }
+  return "detailed coloring page for older children: fine lines, complex scene with many elements, intricate patterns and details, thin clean outlines";
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { photo, age } = await request.json();
+
+    if (!photo || typeof photo !== "string") {
+      return NextResponse.json(
+        { error: "A photo is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!age || typeof age !== "number" || age < 1 || age > 12) {
+      return NextResponse.json(
+        { error: "Age must be a number between 1 and 12" },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "OpenAI API key is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const openai = new OpenAI({ apiKey });
+
+    // Step 1: Analyze the photo with GPT-4o vision
+    const base64Data = photo.includes(",") ? photo.split(",")[1] : photo;
+    const mediaType = photo.startsWith("data:image/png")
+      ? "image/png"
+      : photo.startsWith("data:image/webp")
+        ? "image/webp"
+        : "image/jpeg";
+
+    const analysis = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Describe the main subjects and scene in this family photo in 2-3 sentences. Focus on the people, their activities, and the setting. Be specific but concise.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mediaType};base64,${base64Data}`,
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 300,
+    });
+
+    const description =
+      analysis.choices[0]?.message?.content ?? "a family scene";
+
+    // Step 2: Generate a coloring page
+    const complexityPrompt = getComplexityPrompt(age);
+    const imagePrompt = `Create a black and white coloring book page based on this scene: ${description}. Style: ${complexityPrompt}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons.`;
+
+    const imageResponse = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt: imagePrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "medium",
+    });
+
+    const imageBase64 = imageResponse.data?.[0]?.b64_json;
+
+    if (!imageBase64) {
+      return NextResponse.json(
+        { error: "Failed to generate coloring page image" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      image: `data:image/png;base64,${imageBase64}`,
+      description,
+    });
+  } catch (error) {
+    console.error("Generation error:", error);
+    const message =
+      error instanceof Error ? error.message : "An unexpected error occurred";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
