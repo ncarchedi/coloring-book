@@ -64,3 +64,18 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Use `new Image()` to get dimensions for aspect ratio detection before creating PDF
   - jsPDF unit "in" with format "letter" gives 8.5x11 page dimensions
 ---
+
+## 2026-01-31 - US-007
+- Refactored single-result state to array of ColoringPage objects with `selected` boolean
+- Button text changes to "Generate Another Variation" after first generation
+- Pages displayed in responsive grid (1-col for single, 2-col for multiple)
+- Click card to toggle selection; selected pages have ring highlight, deselected are dimmed
+- PDF export respects selection — exports selected pages only, or all if none specifically selected
+- API route accepts `variationIndex` param, cycles through 6 style variations (faithful, cartoon, storybook, chibi, decorative border, comic book)
+- Each page has individual PNG download button
+- Files changed: src/app/page.tsx (major refactor), src/app/api/generate/route.ts (added variationIndex + styles)
+- **Learnings for future iterations:**
+  - Multi-image PDF: load all images first, then build PDF in onload callback with counter
+  - `stopPropagation` on nested buttons inside clickable cards prevents toggle on download click
+  - Max width bumped from max-w-xl to max-w-2xl to accommodate 2-column grid
+---

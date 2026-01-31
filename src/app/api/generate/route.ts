@@ -13,7 +13,8 @@ function getComplexityPrompt(age: number): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { photo, age } = await request.json();
+    const body = await request.json();
+    const { photo, age, variationIndex = 0 } = body;
 
     if (!photo || typeof photo !== "string") {
       return NextResponse.json(
@@ -72,9 +73,21 @@ export async function POST(request: NextRequest) {
     const description =
       analysis.choices[0]?.message?.content ?? "a family scene";
 
-    // Step 2: Generate a coloring page
+    // Step 2: Generate a coloring page with style variation
     const complexityPrompt = getComplexityPrompt(age);
-    const imagePrompt = `Create a black and white coloring book page based on this scene: ${description}. Style: ${complexityPrompt}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons.`;
+
+    const variationStyles = [
+      "faithful recreation of the scene",
+      "whimsical cartoon interpretation",
+      "storybook illustration style",
+      "playful chibi/cute style",
+      "nature-themed decorative border around the scene",
+      "comic book panel style",
+    ];
+
+    const styleVariation = variationStyles[variationIndex % variationStyles.length];
+
+    const imagePrompt = `Create a black and white coloring book page based on this scene: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons.`;
 
     const imageResponse = await openai.images.generate({
       model: "gpt-image-1",

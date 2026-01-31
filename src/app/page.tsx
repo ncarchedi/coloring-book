@@ -8,49 +8,71 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface ColoringPage {
+  image: string;
+  selected: boolean;
+}
+
 export default function Home() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [age, setAge] = useState(3);
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [pages, setPages] = useState<ColoringPage[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const selectedPages = pages.filter((p) => p.selected);
+
   const handleExportPdf = useCallback(() => {
-    if (!result) return;
+    const toExport = selectedPages.length > 0 ? selectedPages : pages;
+    if (toExport.length === 0) return;
 
-    const img = new Image();
-    img.onload = () => {
-      const isLandscape = img.width > img.height;
-      const orientation = isLandscape ? "landscape" : "portrait";
-      const pdf = new jsPDF({ orientation, unit: "in", format: "letter" });
+    let loaded = 0;
+    const images: { img: HTMLImageElement; src: string }[] = [];
 
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
+    toExport.forEach((page, i) => {
+      const img = new Image();
+      img.onload = () => {
+        images[i] = { img, src: page.image };
+        loaded++;
+        if (loaded === toExport.length) {
+          const first = images[0].img;
+          const isLandscape = first.width > first.height;
+          const orientation = isLandscape ? "landscape" : "portrait";
+          const pdf = new jsPDF({ orientation, unit: "in", format: "letter" });
 
-      const scale = Math.min(pageW / img.width, pageH / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      const x = (pageW - w) / 2;
-      const y = (pageH - h) / 2;
+          images.forEach(({ img: im, src }, idx) => {
+            if (idx > 0) {
+              const land = im.width > im.height;
+              pdf.addPage("letter", land ? "landscape" : "portrait");
+            }
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+            const scale = Math.min(pageW / im.width, pageH / im.height);
+            const w = im.width * scale;
+            const h = im.height * scale;
+            const x = (pageW - w) / 2;
+            const y = (pageH - h) / 2;
+            pdf.addImage(src, "PNG", x, y, w, h);
+          });
 
-      pdf.addImage(result, "PNG", x, y, w, h);
-      pdf.save("coloring-book.pdf");
-    };
-    img.src = result;
-  }, [result]);
+          pdf.save("coloring-book.pdf");
+        }
+      };
+      img.src = page.image;
+    });
+  }, [pages, selectedPages]);
 
   async function handleGenerate() {
     if (!photo) return;
 
     setGenerating(true);
     setError(null);
-    setResult(null);
 
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo, age }),
+        body: JSON.stringify({ photo, age, variationIndex: pages.length }),
       });
 
       const data = await response.json();
@@ -60,7 +82,7 @@ export default function Home() {
         return;
       }
 
-      setResult(data.image);
+      setPages((prev) => [...prev, { image: data.image, selected: true }]);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -68,9 +90,15 @@ export default function Home() {
     }
   }
 
+  function togglePageSelection(index: number) {
+    setPages((prev) =>
+      prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p))
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-start justify-center bg-background px-4 py-12">
-      <main className="w-full max-w-xl space-y-8">
+      <main className="w-full max-w-2xl space-y-8">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold tracking-tight">
             Coloring Book Generator
@@ -89,7 +117,11 @@ export default function Home() {
           disabled={!photo || generating}
           onClick={handleGenerate}
         >
-          {generating ? "Generating…" : "Generate Coloring Page"}
+          {generating
+            ? "Generating…"
+            : pages.length === 0
+              ? "Generate Coloring Page"
+              : "Generate Another Variation"}
         </Button>
 
         {generating && (
@@ -109,30 +141,62 @@ export default function Home() {
           </Card>
         )}
 
-        {result && !generating && (
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Your coloring page is ready!
+        {pages.length > 0 && !generating && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {pages.length} page{pages.length !== 1 ? "s" : ""} generated
+                {selectedPages.length > 0 && selectedPages.length < pages.length
+                  ? ` · ${selectedPages.length} selected for export`
+                  : ""}
               </p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={result}
-                alt="Generated coloring page"
-                className="w-full rounded-lg border"
-              />
-              <div className="flex gap-3">
-                <Button className="flex-1" asChild>
-                  <a href={result} download="coloring-page.png">
-                    Download PNG
-                  </a>
-                </Button>
-                <Button className="flex-1" variant="outline" onClick={handleExportPdf}>
-                  Export PDF
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                  Export PDF{selectedPages.length > 0 && selectedPages.length < pages.length
+                    ? ` (${selectedPages.length})`
+                    : ""}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            <div className={`grid gap-4 ${pages.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+              {pages.map((page, index) => (
+                <Card
+                  key={index}
+                  className={`cursor-pointer transition-all ${
+                    page.selected
+                      ? "ring-2 ring-primary"
+                      : "opacity-60"
+                  }`}
+                  onClick={() => togglePageSelection(index)}
+                >
+                  <CardContent className="p-3 space-y-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={page.image}
+                      alt={`Coloring page ${index + 1}`}
+                      className="w-full rounded-lg border"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        Page {index + 1}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
+                        <a href={page.image} download={`coloring-page-${index + 1}.png`}>
+                          PNG
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         )}
       </main>
     </div>

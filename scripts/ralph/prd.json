@@ -115,7 +115,7 @@
         "Verify in browser via Playwright MCP: grid layout renders, multiple pages display correctly"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Vary the prompt slightly each time to get different interpretations."
     },
     {
@@ -135,6 +135,30 @@
       "priority": 8,
       "passes": false,
       "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Full QA pass via Playwright MCP",
+      "description": "As a developer, I want to verify the entire app works end-to-end in the browser before calling this complete.",
+      "acceptanceCriteria": [
+        "Start dev server (npm run dev) and open http://localhost:3000 via Playwright MCP",
+        "Verify the page loads with title, instructions, upload area, and age slider visible",
+        "Upload a test image (use Playwright to attach a file) and confirm thumbnail preview appears",
+        "Adjust the age slider and confirm the complexity label updates (Simple/Medium/Detailed)",
+        "Click Generate and confirm loading skeleton appears",
+        "After generation completes, confirm the coloring page image is displayed",
+        "Click Download PNG and confirm the download triggers",
+        "Generate a second coloring page and confirm both appear in a grid",
+        "Click Export PDF and confirm the download triggers",
+        "Toggle dark/light mode and confirm the theme switches correctly",
+        "Resize viewport to mobile width (375px) and confirm layout is responsive",
+        "Take screenshots at each step and log results in progress.txt",
+        "Fix any bugs found during this QA pass before marking complete",
+        "npm run build passes after any fixes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "This is a QA-only story. Use Playwright MCP for all browser interactions. If the OpenAI API call takes too long or fails due to no real API key, verify everything up to the Generate button click and note the API dependency."
     }
   ]
 }
