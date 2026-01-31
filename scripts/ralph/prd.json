@@ -229,7 +229,7 @@
         "Verify in browser via Playwright MCP: load the page fresh, click the toggle, and confirm the theme changes instantly on the first and subsequent clicks"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "The toggle may not apply on the first click — possibly a hydration issue or missing initial theme state. Needs investigation."
     }
   ]

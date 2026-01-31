@@ -115,3 +115,14 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Always compare skeleton structure side-by-side with the actual rendered result
   - Skeleton padding/spacing should exactly match the final content's padding/spacing for seamless transition
 ---
+
+## 2026-01-31 - US-014
+- Fixed dark/light mode toggle not responding on first click
+- Root cause: `useTheme()` returns `theme="system"` initially (not "dark"/"light"), so the toggle comparison `theme === "dark"` was wrong on first click
+- Fix: Changed to use `resolvedTheme` instead of `theme` — `resolvedTheme` always returns the actual resolved value ("dark" or "light")
+- Files changed: src/components/theme-toggle.tsx
+- Verified in browser: first click toggles to dark, second click toggles back to light — both instant
+- **Learnings for future iterations:**
+  - Always use `resolvedTheme` from next-themes when comparing theme values, not `theme` (which can be "system")
+  - `theme` is the user's preference string; `resolvedTheme` is the actual applied theme
+---
