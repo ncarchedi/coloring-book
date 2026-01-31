@@ -187,6 +187,50 @@
       "priority": 11,
       "passes": true,
       "notes": "Currently the X button appears weirdly positioned — it should be pinned to the top-right of the preview with appropriate padding so it looks natural."
+    },
+    {
+      "id": "US-012",
+      "title": "Fix uneven padding in age selector box",
+      "description": "As a user, I want the age selector card to have uniform padding on all sides so it looks visually balanced.",
+      "acceptanceCriteria": [
+        "Check current padding values on the age selector Card component",
+        "Ensure padding is uniform on all four sides (top, right, bottom, left)",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: age selector box has even spacing around its content"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "There appears to be too much padding at the top of the age selector box compared to the other sides."
+    },
+    {
+      "id": "US-013",
+      "title": "Fix loading skeleton to match actual generated content",
+      "description": "As a user, I want the loading skeleton shown during image generation to accurately preview the shape of the content that will appear, so the transition feels seamless.",
+      "acceptanceCriteria": [
+        "Review the current loading skeleton layout and compare it to the actual generated result",
+        "The skeleton should match the structure of what actually renders (likely just an image, no header)",
+        "Remove any skeleton elements that don't correspond to real content (e.g. a header bar)",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: trigger generation and confirm the skeleton closely matches the final content layout"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "The current skeleton appears to show a header element plus an image placeholder, but the actual result is just an image. The skeleton should reflect the real content structure."
+    },
+    {
+      "id": "US-014",
+      "title": "Fix dark/light mode toggle responsiveness",
+      "description": "As a user, I want the dark/light mode toggle to take effect immediately on the first click and every subsequent click.",
+      "acceptanceCriteria": [
+        "Verify the theme toggle applies the new theme immediately on the very first click after page load",
+        "Verify subsequent toggles also apply immediately with no delay",
+        "If there is a flash or delay on first toggle, investigate and fix the root cause (e.g. missing initial theme class, hydration mismatch)",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: load the page fresh, click the toggle, and confirm the theme changes instantly on the first and subsequent clicks"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "The toggle may not apply on the first click — possibly a hydration issue or missing initial theme state. Needs investigation."
     }
   ]
 }

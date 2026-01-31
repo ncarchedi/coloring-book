@@ -17,6 +17,13 @@
   - Cannot verify actual generation output without a real API key; verified build, lint, and UI flow pass
 ---
 
+## 2026-01-31 - US-012
+- Removed extra `pt-6` from CardContent in age-selector component; Card already provides `py-6` so the additional top padding was redundant
+- Files changed: `src/components/age-selector.tsx`
+- **Learnings for future iterations:**
+  - shadcn Card (v4) has `py-6` built in, and CardContent has `px-6` — don't add `pt-6` to CardContent or you get double top padding
+---
+
 ## 2026-01-31 - US-011
 - Fixed remove-image button positioning: moved Button outside CardContent to be a direct child of Card with `relative overflow-hidden py-0`
 - Removed padding from CardContent (`p-0`) so the image fills the card edge-to-edge
