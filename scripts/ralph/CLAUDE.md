@@ -58,9 +58,22 @@ If you discover a **reusable pattern**, add it to `## Codebase Patterns` at the 
 
 Before committing, add genuinely reusable knowledge to nearby CLAUDE.md files (API patterns, gotchas, dependencies between files, testing approaches).
 
+### Browser Testing with Playwright MCP
+
+A Playwright MCP server is configured for this project. After implementing a UI story, you MUST verify it in the browser:
+
+1. Make sure the dev server is running (`npm run dev`)
+2. Use the Playwright MCP tools to navigate to `http://localhost:3000`
+3. Verify the acceptance criteria visually — check that components render, interactions work, and the layout looks correct
+4. Take a screenshot and note the result in your progress report
+5. If something looks broken, fix it before committing
+
+This is especially important for: upload UI, age selector, results display, download/export buttons, and overall polish.
+
 ### Quality Requirements
 
 - ALL commits must pass `npm run build` and `npm run lint`
+- Browser verification via Playwright MCP for any UI changes
 - Do NOT commit broken code
 - Keep changes focused and minimal
 - Follow existing code patterns
