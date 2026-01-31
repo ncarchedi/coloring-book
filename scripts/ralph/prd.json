@@ -185,7 +185,7 @@
         "Verify in browser via Playwright MCP: upload an image and confirm the X button sits in the top-right corner"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Currently the X button appears weirdly positioned — it should be pinned to the top-right of the preview with appropriate padding so it looks natural."
     }
   ]

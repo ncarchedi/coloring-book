@@ -16,3 +16,13 @@
   - The `images.edit` endpoint supports the same `quality` and `size` params as `images.generate`
   - Cannot verify actual generation output without a real API key; verified build, lint, and UI flow pass
 ---
+
+## 2026-01-31 - US-011
+- Fixed remove-image button positioning: moved Button outside CardContent to be a direct child of Card with `relative overflow-hidden py-0`
+- Removed padding from CardContent (`p-0`) so the image fills the card edge-to-edge
+- Button now sits flush at top-right corner of the preview card
+- Files changed: `src/components/photo-upload.tsx`
+- **Learnings for future iterations:**
+  - shadcn Card has `py-6` and CardContent has `px-6` by default — override with `py-0` and `p-0` when you need edge-to-edge content
+  - For absolute-positioned elements in cards, position them on the Card itself (with `relative`), not inside CardContent
+---
