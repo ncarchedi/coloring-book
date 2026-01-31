@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 
 function getComplexityPrompt(age: number): string {
   if (age <= 4) {
@@ -87,10 +87,16 @@ export async function POST(request: NextRequest) {
 
     const styleVariation = variationStyles[variationIndex % variationStyles.length];
 
-    const imagePrompt = `Create a black and white coloring book page based on this scene: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons.`;
+    const imagePrompt = `Convert this photo into a black and white coloring book page. Scene context: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons. Preserve the composition, poses, and key details of the original photo.`;
 
-    const imageResponse = await openai.images.generate({
+    // Convert base64 photo to a File for the image edit API
+    const imageBuffer = Buffer.from(base64Data, "base64");
+    const extension = mediaType === "image/png" ? "png" : mediaType === "image/webp" ? "webp" : "jpg";
+    const imageFile = await toFile(imageBuffer, `photo.${extension}`, { type: mediaType });
+
+    const imageResponse = await openai.images.edit({
       model: "gpt-image-1",
+      image: imageFile,
       prompt: imagePrompt,
       n: 1,
       size: "1024x1024",
