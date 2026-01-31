@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { jsPDF } from "jspdf";
 import { PhotoUpload } from "@/components/photo-upload";
 import { AgeSelector } from "@/components/age-selector";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,30 @@ export default function Home() {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleExportPdf = useCallback(() => {
+    if (!result) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const isLandscape = img.width > img.height;
+      const orientation = isLandscape ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "in", format: "letter" });
+
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+
+      const scale = Math.min(pageW / img.width, pageH / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const x = (pageW - w) / 2;
+      const y = (pageH - h) / 2;
+
+      pdf.addImage(result, "PNG", x, y, w, h);
+      pdf.save("coloring-book.pdf");
+    };
+    img.src = result;
+  }, [result]);
 
   async function handleGenerate() {
     if (!photo) return;
@@ -96,11 +121,16 @@ export default function Home() {
                 alt="Generated coloring page"
                 className="w-full rounded-lg border"
               />
-              <Button className="w-full" asChild>
-                <a href={result} download="coloring-page.png">
-                  Download PNG
-                </a>
-              </Button>
+              <div className="flex gap-3">
+                <Button className="flex-1" asChild>
+                  <a href={result} download="coloring-page.png">
+                    Download PNG
+                  </a>
+                </Button>
+                <Button className="flex-1" variant="outline" onClick={handleExportPdf}>
+                  Export PDF
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
