@@ -32,3 +32,13 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Split base64 data URL to extract raw base64 for OpenAI vision API
   - getComplexityPrompt duplicates logic from age-selector — could extract to shared util if needed
 ---
+
+## 2026-01-31 - US-004
+- Added Generate button, Skeleton loading state, error display, and result image display to page.tsx
+- Generate button disabled when no photo uploaded or during generation
+- Error shown in destructive-bordered Card; result shown in Card with img tag
+- Files changed: src/app/page.tsx (added state management, generate handler, UI sections)
+- **Learnings for future iterations:**
+  - Result image stored as data URL in state — will be needed for US-005 (PNG download) and US-006 (PDF export)
+  - All generation state (generating, result, error) lives in page.tsx
+---
