@@ -95,10 +95,11 @@
         "Uses jsPDF to create a PDF client-side",
         "Each coloring page is a full page in the PDF (letter size, landscape or portrait depending on image)",
         "Downloads automatically with filename like 'coloring-book.pdf'",
-        "npm run build passes"
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: export button visible, PDF downloads correctly"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -110,7 +111,8 @@
         "Each generation creates a different style/interpretation",
         "All generated pages displayed in a grid",
         "Can select which pages to include in PDF export",
-        "npm run build passes"
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: grid layout renders, multiple pages display correctly"
       ],
       "priority": 7,
       "passes": false,
@@ -127,7 +129,8 @@
         "Mobile-responsive layout that works on phone and tablet",
         "App title and brief instructions at the top",
         "Consistent use of shadcn/ui components throughout",
-        "npm run build passes"
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: full user flow works, dark/light mode toggles, responsive layout on mobile viewport"
       ],
       "priority": 8,
       "passes": false,

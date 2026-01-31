@@ -52,3 +52,15 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Result is already a data URL, so `<a href={dataUrl} download="name.png">` works directly — no conversion needed
   - `asChild` on shadcn Button lets you render as an anchor while keeping button styling
 ---
+
+## 2026-01-31 - US-006
+- Added Export PDF button using jsPDF (client-side PDF generation)
+- PDF uses letter size, auto-detects landscape/portrait based on image aspect ratio
+- Image centered on the page, scaled to fit
+- Downloads as "coloring-book.pdf"
+- Files changed: src/app/page.tsx (added jsPDF import, handleExportPdf callback, Export PDF button)
+- **Learnings for future iterations:**
+  - jsPDF `addImage` works directly with data URLs — no conversion needed
+  - Use `new Image()` to get dimensions for aspect ratio detection before creating PDF
+  - jsPDF unit "in" with format "letter" gives 8.5x11 page dimensions
+---
