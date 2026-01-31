@@ -24,7 +24,7 @@ export function AgeSelector({ age, onAgeChange }: AgeSelectorProps) {
 
   return (
     <Card>
-      <CardContent className="space-y-4 pt-6">
+      <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <Label htmlFor="age-slider" className="text-sm font-medium">
             Child&apos;s Age
