@@ -157,7 +157,7 @@
         "npm run build passes after any fixes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "This is a QA-only story. Use Playwright MCP for all browser interactions. If the OpenAI API call takes too long or fails due to no real API key, verify everything up to the Generate button click and note the API dependency."
     }
   ]

@@ -92,3 +92,15 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - next-themes requires `suppressHydrationWarning` on `<html>` and `attribute="class"` for Tailwind dark mode
   - tw-animate-css provides `animate-in fade-in` classes out of the box
 ---
+
+## 2026-01-31 - US-009
+- Full end-to-end QA pass via Playwright MCP — all checks passed, no bugs found
+- Verified: page load, photo upload with preview, age slider (Simple/Medium/Detailed), generate with loading spinner, coloring page display, PNG download, second variation in 2-column grid, PDF export, dark/light mode toggle, mobile responsive layout at 375px
+- Screenshots taken at each step (qa-01 through qa-09 in .playwright-mcp/)
+- npm run build passes with no errors
+- Files changed: scripts/ralph/prd.json (marked US-009 passes: true), scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Playwright MCP snapshots become huge when pages contain base64 data URLs — use screenshots instead
+  - browser_evaluate is useful for clicking elements when snapshots are too large to parse
+  - Age slider can be tested with ArrowLeft/ArrowRight key presses after focusing
+---
