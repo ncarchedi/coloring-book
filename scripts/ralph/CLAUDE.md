@@ -89,7 +89,7 @@ This is especially important for: upload UI, age selector, results display, down
 After completing a user story, check if ALL stories have `passes: true`.
 
 If ALL stories are complete, reply with:
-**COMPLETE**
+<promise>COMPLETE</promise>
 
 If stories remain with `passes: false`, end your response normally.
 
