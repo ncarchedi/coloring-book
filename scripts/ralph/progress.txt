@@ -104,3 +104,14 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - browser_evaluate is useful for clicking elements when snapshots are too large to parse
   - Age slider can be tested with ArrowLeft/ArrowRight key presses after focusing
 ---
+
+## 2026-01-31 - US-013
+- Fixed loading skeleton to match actual generated content structure
+- Removed fake header skeleton bar (`h-6 w-3/4 mx-auto`) that had no corresponding element in results
+- Changed skeleton CardContent padding from `p-6 space-y-4` to `p-3 space-y-2` to match result cards
+- Added footer row skeleton (page label + download button placeholders) to match the actual result layout
+- Files changed: src/app/page.tsx (skeleton section)
+- **Learnings for future iterations:**
+  - Always compare skeleton structure side-by-side with the actual rendered result
+  - Skeleton padding/spacing should exactly match the final content's padding/spacing for seamless transition
+---

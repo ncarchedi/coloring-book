@@ -142,9 +142,12 @@ export default function Home() {
         {/* Loading Skeleton */}
         {generating && (
           <Card className="animate-in fade-in duration-300">
-            <CardContent className="p-6 space-y-4">
-              <Skeleton className="h-6 w-3/4 mx-auto" />
+            <CardContent className="p-3 space-y-2">
               <Skeleton className="aspect-square w-full rounded-lg" />
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-8 w-16 rounded-md" />
+              </div>
             </CardContent>
           </Card>
         )}

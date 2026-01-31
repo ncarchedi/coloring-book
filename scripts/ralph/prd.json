@@ -214,7 +214,7 @@
         "Verify in browser via Playwright MCP: trigger generation and confirm the skeleton closely matches the final content layout"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "The current skeleton appears to show a header element plus an image placeholder, but the actual result is just an image. The skeleton should reflect the real content structure."
     },
     {
