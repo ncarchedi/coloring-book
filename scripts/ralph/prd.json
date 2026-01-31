@@ -1,0 +1,137 @@
+{
+  "project": "Coloring Book Generator",
+  "branchName": "ralph/coloring-book-v1",
+  "description": "Web app that converts uploaded family photos into age-appropriate coloring book pages using OpenAI",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Photo upload UI with drag-and-drop",
+      "description": "As a parent, I want to upload a family photo so it can be turned into a coloring page.",
+      "acceptanceCriteria": [
+        "Drag-and-drop zone with click-to-browse fallback",
+        "Accepts jpg, png, webp images",
+        "Shows thumbnail preview of uploaded photo",
+        "Photo is held in browser memory only — never sent to server for storage",
+        "Can remove/replace the photo before generating",
+        "Uses shadcn Card component for the upload area",
+        "npm run build passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Age selector with complexity mapping",
+      "description": "As a parent, I want to specify my child's age so the coloring page complexity is appropriate.",
+      "acceptanceCriteria": [
+        "Slider input for age 1-12 using shadcn Slider component",
+        "Displays current age and complexity label (Simple/Medium/Detailed)",
+        "Age 1-4: Simple (large shapes, thick lines, few elements)",
+        "Age 5-7: Medium (moderate detail, some small elements)",
+        "Age 8-12: Detailed (fine lines, complex scenes, many elements)",
+        "Default age is 3",
+        "npm run build passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "OpenAI API route for coloring page generation",
+      "description": "As a developer, I need an API route that takes a photo and age, analyzes the photo with GPT-4o vision, and generates a B&W coloring page with appropriate complexity.",
+      "acceptanceCriteria": [
+        "POST /api/generate accepts base64 photo + age number",
+        "Calls GPT-4o vision to describe the photo's subjects and scene",
+        "Builds image generation prompt with age-appropriate complexity instructions",
+        "Calls OpenAI image generation (gpt-image-1 or dall-e-3) requesting B&W line art coloring page",
+        "Returns generated image as base64",
+        "Handles errors gracefully with meaningful error messages",
+        "Uses OPENAI_API_KEY from environment variables",
+        "npm run build passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "The photo should NOT be stored anywhere. Process in memory and discard."
+    },
+    {
+      "id": "US-004",
+      "title": "Results display with loading state",
+      "description": "As a parent, I want to see the generated coloring page with a nice loading experience.",
+      "acceptanceCriteria": [
+        "Generate button triggers API call with uploaded photo + selected age",
+        "Shows shadcn Skeleton loading state while generating",
+        "Displays generated coloring page image when ready",
+        "Shows error message if generation fails",
+        "Generate button is disabled when no photo is uploaded",
+        "npm run build passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Download coloring page as PNG",
+      "description": "As a parent, I want to download the coloring page as a PNG image.",
+      "acceptanceCriteria": [
+        "Download PNG button appears after generation completes",
+        "Downloads the coloring page as a PNG file",
+        "Filename includes a descriptive name like 'coloring-page.png'",
+        "Uses shadcn Button component",
+        "npm run build passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Export coloring pages as PDF",
+      "description": "As a parent, I want to export coloring pages as a PDF so I can print them easily.",
+      "acceptanceCriteria": [
+        "Export PDF button appears after at least one coloring page is generated",
+        "Uses jsPDF to create a PDF client-side",
+        "Each coloring page is a full page in the PDF (letter size, landscape or portrait depending on image)",
+        "Downloads automatically with filename like 'coloring-book.pdf'",
+        "npm run build passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Generate multiple coloring pages from one photo",
+      "description": "As a parent, I want to generate several different coloring page variations from a single photo.",
+      "acceptanceCriteria": [
+        "Option to generate additional pages from the same photo",
+        "Each generation creates a different style/interpretation",
+        "All generated pages displayed in a grid",
+        "Can select which pages to include in PDF export",
+        "npm run build passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Vary the prompt slightly each time to get different interpretations."
+    },
+    {
+      "id": "US-008",
+      "title": "Polish UI — slick minimal design",
+      "description": "As a user, I want the app to look polished and professional.",
+      "acceptanceCriteria": [
+        "Clean layout with good whitespace and visual hierarchy",
+        "Dark/light mode toggle using shadcn theming",
+        "Subtle transitions and animations (loading, hover states)",
+        "Mobile-responsive layout that works on phone and tablet",
+        "App title and brief instructions at the top",
+        "Consistent use of shadcn/ui components throughout",
+        "npm run build passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
