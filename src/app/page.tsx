@@ -96,6 +96,11 @@ export default function Home() {
                 alt="Generated coloring page"
                 className="w-full rounded-lg border"
               />
+              <Button className="w-full" asChild>
+                <a href={result} download="coloring-page.png">
+                  Download PNG
+                </a>
+              </Button>
             </CardContent>
           </Card>
         )}
