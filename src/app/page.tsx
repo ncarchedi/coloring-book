@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { PhotoUpload } from "@/components/photo-upload";
+import { AgeSelector } from "@/components/age-selector";
 
 export default function Home() {
   const [photo, setPhoto] = useState<string | null>(null);
+  const [age, setAge] = useState(3);
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-background px-4 py-12">
@@ -19,6 +21,7 @@ export default function Home() {
         </div>
 
         <PhotoUpload photo={photo} onPhotoChange={setPhoto} />
+        <AgeSelector age={age} onAgeChange={setAge} />
       </main>
     </div>
   );
