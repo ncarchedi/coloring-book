@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useColoringBook } from "@/context/coloring-book-context";
 import { MultiPhotoUpload } from "@/components/multi-photo-upload";
 import { AgeSelector } from "@/components/age-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 
 interface PhotoPage {
   originalPhoto: string;
@@ -18,6 +20,8 @@ interface PhotoPage {
 }
 
 export default function CreateFromPhotos() {
+  const router = useRouter();
+  const coloringBook = useColoringBook();
   const [photos, setPhotos] = useState<string[]>([]);
   const [age, setAge] = useState(3);
   const [generating, setGenerating] = useState(false);
@@ -27,6 +31,14 @@ export default function CreateFromPhotos() {
 
   const completedCount = pages.filter((p) => p.status === "done").length;
   const totalCount = pages.length;
+
+  const handleContinueToPreview = useCallback(() => {
+    coloringBook.reset();
+    pages
+      .filter((p) => p.status === "done" && p.coloringImage)
+      .forEach((p) => coloringBook.addPage(p.coloringImage!));
+    router.push("/preview");
+  }, [coloringBook, pages, router]);
 
   async function handleGenerate() {
     if (photos.length === 0) return;
@@ -224,13 +236,17 @@ export default function CreateFromPhotos() {
               ))}
             </div>
 
-            {/* Done message */}
+            {/* Continue to Preview */}
             {!generating && completedCount > 0 && (
-              <p className="text-sm text-muted-foreground text-center">
-                {completedCount} coloring page{completedCount !== 1 ? "s" : ""}{" "}
-                generated — continue to the book preview to reorder, edit, and
-                export as PDF.
-              </p>
+              <Button
+                className="w-full transition-all duration-200"
+                size="lg"
+                onClick={handleContinueToPreview}
+              >
+                <BookOpen className="size-4" />
+                Continue to Book Preview ({completedCount} page
+                {completedCount !== 1 ? "s" : ""})
+              </Button>
             )}
           </div>
         )}

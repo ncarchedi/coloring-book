@@ -2,7 +2,9 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { jsPDF } from "jspdf";
+import { useColoringBook } from "@/context/coloring-book-context";
 import { AgeSelector } from "@/components/age-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Download, FileDown, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, Download, FileDown, Loader2, Sparkles } from "lucide-react";
 
 interface GeneratedPage {
   image: string;
@@ -22,6 +24,8 @@ interface GeneratedPage {
 }
 
 export default function CreateFromTheme() {
+  const router = useRouter();
+  const coloringBook = useColoringBook();
   const [theme, setTheme] = useState("");
   const [age, setAge] = useState(3);
   const [pageCount, setPageCount] = useState(6);
@@ -170,6 +174,13 @@ export default function CreateFromTheme() {
       prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p))
     );
   }
+
+  const handleContinueToPreview = useCallback(() => {
+    coloringBook.reset();
+    const imagesToExport = selectedPages.length > 0 ? selectedPages : pages.filter((p) => p.image);
+    imagesToExport.forEach((p) => coloringBook.addPage(p.image));
+    router.push("/preview");
+  }, [coloringBook, pages, selectedPages, router]);
 
   const completedCount = pages.filter((p) => !p.loading).length;
   const hasAnyResults = pages.some((p) => p.image);
@@ -374,6 +385,18 @@ export default function CreateFromTheme() {
                 </Card>
               ))}
             </div>
+
+            {/* Continue to Preview */}
+            {hasAnyResults && !generating && (
+              <Button
+                className="w-full transition-all duration-200"
+                size="lg"
+                onClick={handleContinueToPreview}
+              >
+                <BookOpen className="size-4" />
+                Continue to Book Preview
+              </Button>
+            )}
           </div>
         )}
 

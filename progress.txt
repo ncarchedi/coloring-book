@@ -89,3 +89,17 @@
   - US-018 scope overlapped significantly with US-019 — the batch upload story already included progress display and results grid
   - When stories have overlapping scope, verify acceptance criteria are met before writing new code
 ---
+
+## 2026-02-01 - US-020
+- Created `/preview` route with full book preview page: grid of all pages, reorder (move up/down), remove, title input, PDF export with optional cover page
+- Updated theme flow (`/create/theme`) to push selected pages to shared context and show "Continue to Book Preview" button after generation
+- Updated photos flow (`/create/photos`) to push generated coloring pages to shared context and show "Continue to Book Preview" button
+- PDF export supports optional cover page with centered title when book title is set
+- Individual PNG download still supported per page
+- Empty state redirects to home with friendly message
+- Files changed: `src/app/preview/page.tsx` (new), `src/app/create/theme/page.tsx`, `src/app/create/photos/page.tsx`
+- **Learnings for future iterations:**
+  - The shared `ColoringBookContext` (`reset()` + `addPage()`) works well for transferring pages from creation flows to the preview page
+  - jsPDF cover page: use `pdf.text()` with `align: "center"` at page midpoint, then `pdf.addPage()` for subsequent content pages
+  - Can't easily inject data into React context from Playwright for testing — full flow verification requires API key
+---

@@ -331,7 +331,7 @@
         "npm run build passes"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": "This replaces/extends the existing single-page PDF export. The cover page can be simple — just the title centered on the page."
     },
     {
