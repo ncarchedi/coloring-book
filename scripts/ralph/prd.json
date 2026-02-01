@@ -313,7 +313,7 @@
         "npm run build passes"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "Generate pages sequentially to avoid overwhelming the API. Show original photo thumbnails alongside generated pages."
     },
     {

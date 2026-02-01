@@ -79,3 +79,13 @@
   - Multi-file input needs `multiple` attribute and clearing `inputRef.current.value = ""` after each selection to allow re-selecting
   - Reorder buttons use opacity-0 group-hover:opacity-100 for clean hover reveal
 ---
+
+## 2026-02-01 - US-019
+- All acceptance criteria were already implemented in US-018 (batch photo upload flow)
+- Verified in browser: progress indicator ("Converting photo X of Y"), progressive grid rendering, side-by-side original/coloring layout, skeleton placeholders, per-page error handling
+- No code changes needed — marked as passing
+- Files changed: none (prd.json updated only)
+- **Learnings for future iterations:**
+  - US-018 scope overlapped significantly with US-019 — the batch upload story already included progress display and results grid
+  - When stories have overlapping scope, verify acceptance criteria are met before writing new code
+---
