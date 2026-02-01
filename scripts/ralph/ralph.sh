@@ -2,8 +2,6 @@
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [--tool amp|claude] [max_iterations]
 
-set -e
-
 # Parse arguments
 TOOL="amp" # Default to amp for backwards compatibility
 MAX_ITERATIONS=10
@@ -94,6 +92,15 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
     echo ""
     echo "Ralph completed all tasks!"
+    echo "Completed at iteration $i of $MAX_ITERATIONS"
+    exit 0
+  fi
+
+  # Fallback: check PRD directly for completion (in case agent didn't emit sentinel)
+  REMAINING=$(jq '[.userStories[] | select(.passes == false)] | length' "$PRD_FILE" 2>/dev/null || echo "999")
+  if [ "$REMAINING" -eq 0 ]; then
+    echo ""
+    echo "Ralph completed all tasks! (detected via PRD check)"
     echo "Completed at iteration $i of $MAX_ITERATIONS"
     exit 0
   fi
