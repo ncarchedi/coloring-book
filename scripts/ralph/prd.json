@@ -231,6 +231,125 @@
       "priority": 14,
       "passes": true,
       "notes": "The toggle may not apply on the first click — possibly a hydration issue or missing initial theme state. Needs investigation."
+    },
+    {
+      "id": "US-015",
+      "title": "Coloring book project model and landing page",
+      "description": "As a user, I want to create a coloring book project (not just a single page) so I can build a multi-page book.",
+      "acceptanceCriteria": [
+        "New landing/home page with two options: 'Create from Theme' and 'Create from Photos'",
+        "Each option is a prominent card with icon, title, and short description",
+        "Clicking either card navigates to the respective creation flow",
+        "Add a shared coloring book state/context that holds: book title, array of pages, age setting",
+        "The existing single-photo flow is preserved but will be refactored in later stories",
+        "npm run build passes"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": "This is the foundational architecture change. The app shifts from 'generate one page' to 'build a book with multiple pages'."
+    },
+    {
+      "id": "US-016",
+      "title": "Theme-based coloring book generation flow",
+      "description": "As a user, I want to describe a theme in a text field and have the app auto-generate an entire coloring book based on that theme.",
+      "acceptanceCriteria": [
+        "New route/page for theme-based creation",
+        "Text input (textarea) for describing the theme (e.g. 'underwater ocean adventure', 'dinosaurs in space')",
+        "Age selector (reuse existing component)",
+        "Number-of-pages selector (e.g. 4, 6, 8, 10 pages) using a dropdown or slider",
+        "Generate button that kicks off generation of all pages",
+        "API route that takes a theme + age + page count, uses GPT-4o to plan varied scenes for each page, then generates each coloring page image",
+        "Each page prompt should be a unique scene/variation within the theme (not duplicates)",
+        "npm run build passes"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": "The API should first call GPT-4o to brainstorm a list of scene descriptions for the theme, then generate each page image from those descriptions."
+    },
+    {
+      "id": "US-017",
+      "title": "Theme generation progress and results display",
+      "description": "As a user, I want to see progress as my theme-based coloring book pages are generated one by one.",
+      "acceptanceCriteria": [
+        "Progress indicator showing 'Generating page X of Y'",
+        "Each page appears in a grid as soon as it's generated (don't wait for all to finish)",
+        "Skeleton placeholders for pages that haven't been generated yet",
+        "User can see all completed pages in a scrollable grid",
+        "Error handling: if a single page fails, show error for that page but continue generating others",
+        "npm run build passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Use streaming/sequential generation so the user sees progress rather than waiting for everything at once."
+    },
+    {
+      "id": "US-018",
+      "title": "Batch photo upload flow",
+      "description": "As a user, I want to upload multiple photos at once and generate a coloring book from all of them.",
+      "acceptanceCriteria": [
+        "New route/page for photo-based coloring book creation",
+        "Multi-file upload zone (drag-and-drop or click-to-browse) that accepts multiple images at once",
+        "Shows thumbnail grid of all uploaded photos with ability to remove individual photos",
+        "Ability to reorder photos (drag to reorder or move up/down buttons)",
+        "Age selector (reuse existing component)",
+        "Generate button that creates one coloring page per uploaded photo",
+        "All photos held in browser memory only — no server storage",
+        "npm run build passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Reuse the existing photo-to-coloring-page API logic but call it once per photo. The upload zone should clearly indicate multi-select is supported."
+    },
+    {
+      "id": "US-019",
+      "title": "Batch generation progress and results display",
+      "description": "As a user, I want to see progress as each of my uploaded photos is converted into a coloring page.",
+      "acceptanceCriteria": [
+        "Progress indicator showing 'Converting photo X of Y'",
+        "Each coloring page appears in the grid as it completes",
+        "Side-by-side or before/after view showing original photo next to its coloring page",
+        "Skeleton placeholders for pages still being generated",
+        "Error handling per-page: if one photo fails, others continue",
+        "npm run build passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Generate pages sequentially to avoid overwhelming the API. Show original photo thumbnails alongside generated pages."
+    },
+    {
+      "id": "US-020",
+      "title": "Coloring book preview, editing, and PDF export",
+      "description": "As a user, I want to preview my complete coloring book, reorder or remove pages, and export it as a PDF.",
+      "acceptanceCriteria": [
+        "Book preview page showing all generated pages in order",
+        "Ability to reorder pages via drag-and-drop or move buttons",
+        "Ability to remove individual pages from the book",
+        "Optional book title input that appears on a cover page in the PDF",
+        "Export PDF button that compiles all pages (and optional cover) into a single PDF",
+        "Each coloring page is a full page in the PDF (letter size)",
+        "Download individual pages as PNG still supported",
+        "npm run build passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "This replaces/extends the existing single-page PDF export. The cover page can be simple — just the title centered on the page."
+    },
+    {
+      "id": "US-021",
+      "title": "Navigation and flow polish",
+      "description": "As a user, I want smooth navigation between the home page, creation flows, and book preview.",
+      "acceptanceCriteria": [
+        "Header/nav bar with app title and home link",
+        "Back button or breadcrumb navigation within creation flows",
+        "Smooth transitions between pages",
+        "Consistent layout and styling across all new pages",
+        "Mobile-responsive layout for all new pages",
+        "The old single-photo flow redirects or integrates cleanly into the new structure",
+        "npm run build passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Make sure the app feels cohesive — the new multi-page flows should share the same design language as the existing UI."
     }
   ]
 }

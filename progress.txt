@@ -33,3 +33,19 @@
   - shadcn Card has `py-6` and CardContent has `px-6` by default — override with `py-0` and `p-0` when you need edge-to-edge content
   - For absolute-positioned elements in cards, position them on the Card itself (with `relative`), not inside CardContent
 ---
+
+## 2026-02-01 - US-016
+- Implemented theme-based coloring book generation flow
+- Created new API route `POST /api/generate-theme` that uses GPT-4o to brainstorm unique scene descriptions, then generates each page via gpt-image-1
+- Replaced placeholder "coming soon" page with full UI: theme textarea, age selector, page count slider (2-10), generate button
+- Added shadcn Textarea component (installed via `npx shadcn add textarea`)
+- Results display in a grid with selection, individual PNG download, and PDF export
+- Loading state shows skeleton placeholders for all pages being generated
+- Error handling for individual page failures (others continue)
+- Files changed: `src/app/create/theme/page.tsx`, `src/app/api/generate-theme/route.ts`, `src/components/ui/textarea.tsx`
+- **Learnings for future iterations:**
+  - Theme-based generation uses `images.generate` (not `images.edit`) since there's no reference image
+  - GPT-4o scene planning step with `temperature: 1` gives good variety in scene descriptions
+  - Sequential image generation for multiple pages takes a long time — future story US-017 should add streaming/progressive display
+  - Parsing GPT-4o JSON output needs a regex fallback for markdown code blocks
+---
