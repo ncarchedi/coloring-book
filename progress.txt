@@ -49,3 +49,18 @@
   - Sequential image generation for multiple pages takes a long time — future story US-017 should add streaming/progressive display
   - Parsing GPT-4o JSON output needs a regex fallback for markdown code blocks
 ---
+
+## 2026-02-01 - US-017
+- Split monolithic `/api/generate-theme` into two endpoints: `/api/generate-theme/plan` (scene planning) and `/api/generate-theme/page` (single page generation)
+- Updated theme page to call endpoints sequentially: plan scenes first, then generate each page one by one
+- Pages appear in the grid as soon as each completes — skeleton placeholders for pending pages
+- Progress indicator: button shows "Generating page X of Y", counter shows "N of M pages generated"
+- Added progress bar (animated) showing completion percentage
+- Per-page status labels: "generating…" for active page, "waiting" for queued pages
+- Per-page error handling: failed pages show error message, others continue generating
+- Files changed: `src/app/create/theme/page.tsx`, `src/app/api/generate-theme/plan/route.ts` (new), `src/app/api/generate-theme/page/route.ts` (new)
+- **Learnings for future iterations:**
+  - Splitting batch API calls into plan + sequential single-item calls enables progressive UI updates
+  - The original batch endpoint (`/api/generate-theme/route.ts`) is kept for backwards compatibility but the UI no longer uses it
+  - `useRef` for abort flags avoids stale closure issues in async loops
+---

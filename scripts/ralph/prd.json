@@ -279,7 +279,7 @@
         "npm run build passes"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "Use streaming/sequential generation so the user sees progress rather than waiting for everything at once."
     },
     {

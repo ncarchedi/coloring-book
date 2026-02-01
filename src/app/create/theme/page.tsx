@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { jsPDF } from "jspdf";
 import { AgeSelector } from "@/components/age-selector";
@@ -18,6 +18,7 @@ interface GeneratedPage {
   scene: string;
   selected: boolean;
   error?: string;
+  loading?: boolean;
 }
 
 export default function CreateFromTheme() {
@@ -27,8 +28,11 @@ export default function CreateFromTheme() {
   const [generating, setGenerating] = useState(false);
   const [pages, setPages] = useState<GeneratedPage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState({ current: 0, total: 0, phase: "" });
+  const abortRef = useRef(false);
 
   const selectedPages = pages.filter((p) => p.selected && p.image);
+  const successPages = pages.filter((p) => p.image);
 
   const handleExportPdf = useCallback(() => {
     const toExport = selectedPages.length > 0 ? selectedPages : pages.filter((p) => p.image);
@@ -73,38 +77,91 @@ export default function CreateFromTheme() {
   async function handleGenerate() {
     if (!theme.trim()) return;
 
+    abortRef.current = false;
     setGenerating(true);
     setError(null);
     setPages([]);
+    setProgress({ current: 0, total: pageCount, phase: "Planning scenes" });
 
     try {
-      const response = await fetch("/api/generate-theme", {
+      // Step 1: Plan scenes
+      const planRes = await fetch("/api/generate-theme/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ theme: theme.trim(), age, pageCount }),
+        body: JSON.stringify({ theme: theme.trim(), pageCount }),
       });
 
-      const data = await response.json();
+      const planData = await planRes.json();
 
-      if (!response.ok) {
-        setError(data.error || "Failed to generate coloring book");
+      if (!planRes.ok) {
+        setError(planData.error || "Failed to plan scenes");
+        setGenerating(false);
         return;
       }
 
-      const generated: GeneratedPage[] = data.scenes.map(
-        (s: { image: string; scene: string; error?: string }) => ({
-          image: s.image,
-          scene: s.scene,
-          selected: !s.error,
-          error: s.error,
-        })
+      const scenes: string[] = planData.scenes;
+
+      // Initialize pages with loading state
+      setPages(
+        scenes.map((scene) => ({
+          image: "",
+          scene,
+          selected: true,
+          loading: true,
+        }))
       );
 
-      setPages(generated);
+      // Step 2: Generate each page sequentially
+      for (let i = 0; i < scenes.length; i++) {
+        if (abortRef.current) break;
+
+        setProgress({
+          current: i + 1,
+          total: scenes.length,
+          phase: `Generating page ${i + 1} of ${scenes.length}`,
+        });
+
+        try {
+          const pageRes = await fetch("/api/generate-theme/page", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ scene: scenes[i], age }),
+          });
+
+          const pageData = await pageRes.json();
+
+          if (!pageRes.ok) {
+            setPages((prev) =>
+              prev.map((p, idx) =>
+                idx === i
+                  ? { ...p, loading: false, error: pageData.error || "Failed", selected: false }
+                  : p
+              )
+            );
+          } else {
+            setPages((prev) =>
+              prev.map((p, idx) =>
+                idx === i
+                  ? { ...p, loading: false, image: pageData.image }
+                  : p
+              )
+            );
+          }
+        } catch {
+          setPages((prev) =>
+            prev.map((p, idx) =>
+              idx === i
+                ? { ...p, loading: false, error: "Generation failed", selected: false }
+                : p
+            )
+          );
+        }
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setGenerating(false);
+      setProgress({ current: 0, total: 0, phase: "" });
     }
   }
 
@@ -114,7 +171,8 @@ export default function CreateFromTheme() {
     );
   }
 
-  const successPages = pages.filter((p) => p.image);
+  const completedCount = pages.filter((p) => !p.loading).length;
+  const hasAnyResults = pages.some((p) => p.image);
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-background px-4 py-8 sm:py-12">
@@ -192,7 +250,7 @@ export default function CreateFromTheme() {
           {generating ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Generating {pageCount} pages&hellip;
+              {progress.phase || "Generating\u2026"}
             </>
           ) : (
             <>
@@ -201,24 +259,6 @@ export default function CreateFromTheme() {
             </>
           )}
         </Button>
-
-        {/* Loading Skeleton */}
-        {generating && (
-          <div className="space-y-3 animate-in fade-in duration-300">
-            <p className="text-sm text-muted-foreground text-center">
-              Planning scenes and generating pages&hellip; this may take a moment.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {Array.from({ length: pageCount }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-3">
-                    <Skeleton className="aspect-square w-full rounded-lg" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Error */}
         {error && (
@@ -229,17 +269,20 @@ export default function CreateFromTheme() {
           </Card>
         )}
 
-        {/* Results */}
-        {pages.length > 0 && !generating && (
+        {/* Results Grid (shown during and after generation) */}
+        {pages.length > 0 && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {successPages.length} page{successPages.length !== 1 ? "s" : ""} generated
-                {selectedPages.length > 0 && selectedPages.length < successPages.length
-                  ? ` · ${selectedPages.length} selected`
-                  : ""}
+                {generating
+                  ? `${completedCount} of ${pages.length} pages generated`
+                  : `${successPages.length} page${successPages.length !== 1 ? "s" : ""} generated`}
+                {!generating &&
+                  selectedPages.length > 0 &&
+                  selectedPages.length < successPages.length &&
+                  ` \u00b7 ${selectedPages.length} selected`}
               </p>
-              {successPages.length > 0 && (
+              {hasAnyResults && !generating && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -255,23 +298,39 @@ export default function CreateFromTheme() {
               )}
             </div>
 
+            {/* Progress bar */}
+            {generating && (
+              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${pages.length > 0 ? (completedCount / pages.length) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {pages.map((page, index) => (
                 <Card
                   key={index}
                   className={`transition-all duration-200 ${
-                    page.error
-                      ? "border-destructive opacity-60"
-                      : `cursor-pointer hover:shadow-md ${
-                          page.selected
-                            ? "ring-2 ring-primary"
-                            : "opacity-60 hover:opacity-80"
-                        }`
+                    page.loading
+                      ? ""
+                      : page.error
+                        ? "border-destructive opacity-60"
+                        : `cursor-pointer hover:shadow-md ${
+                            page.selected
+                              ? "ring-2 ring-primary"
+                              : "opacity-60 hover:opacity-80"
+                          }`
                   }`}
-                  onClick={() => !page.error && togglePageSelection(index)}
+                  onClick={() => !page.error && !page.loading && togglePageSelection(index)}
                 >
                   <CardContent className="p-3 space-y-2">
-                    {page.error ? (
+                    {page.loading ? (
+                      <Skeleton className="aspect-square w-full rounded-lg" />
+                    ) : page.error ? (
                       <div className="aspect-square w-full rounded-lg bg-destructive/10 flex items-center justify-center">
                         <p className="text-destructive text-xs text-center px-4">
                           Failed to generate: {page.error}
@@ -283,13 +342,18 @@ export default function CreateFromTheme() {
                         <img
                           src={page.image}
                           alt={`Coloring page ${index + 1}: ${page.scene}`}
-                          className="w-full rounded-lg border"
+                          className="w-full rounded-lg border animate-in fade-in duration-500"
                         />
                       </>
                     )}
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground truncate mr-2">
                         Page {index + 1}
+                        {page.loading && (
+                          <span className="ml-1 text-muted-foreground/60">
+                            {index < progress.current ? " — generating\u2026" : " — waiting"}
+                          </span>
+                        )}
                       </span>
                       {page.image && (
                         <Button
