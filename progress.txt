@@ -64,3 +64,18 @@
   - The original batch endpoint (`/api/generate-theme/route.ts`) is kept for backwards compatibility but the UI no longer uses it
   - `useRef` for abort flags avoids stale closure issues in async loops
 ---
+
+## 2026-02-01 - US-018
+- Created `MultiPhotoUpload` component supporting multi-file drag-and-drop, thumbnail grid, remove individual photos, and reorder (move up/down)
+- Rewrote `/create/photos` page to use batch photo upload instead of single-photo upload
+- Sequential generation: calls existing `/api/generate` endpoint once per uploaded photo
+- Progress bar and "Converting photo X of Y" indicator during generation
+- Side-by-side original/coloring-page display in results grid
+- Per-photo error handling: if one fails, others continue
+- All photos held in browser memory only
+- Files changed: `src/components/multi-photo-upload.tsx` (new), `src/app/create/photos/page.tsx` (rewritten)
+- **Learnings for future iterations:**
+  - The existing `/api/generate` endpoint works unchanged for batch — just call it once per photo sequentially
+  - Multi-file input needs `multiple` attribute and clearing `inputRef.current.value = ""` after each selection to allow re-selecting
+  - Reorder buttons use opacity-0 group-hover:opacity-100 for clean hover reveal
+---

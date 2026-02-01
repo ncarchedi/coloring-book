@@ -1,102 +1,99 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { jsPDF } from "jspdf";
-import { PhotoUpload } from "@/components/photo-upload";
+import { MultiPhotoUpload } from "@/components/multi-photo-upload";
 import { AgeSelector } from "@/components/age-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Download, FileDown, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
-interface ColoringPage {
-  image: string;
-  selected: boolean;
+interface PhotoPage {
+  originalPhoto: string;
+  coloringImage: string | null;
+  status: "pending" | "generating" | "done" | "error";
+  error?: string;
 }
 
 export default function CreateFromPhotos() {
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [age, setAge] = useState(3);
   const [generating, setGenerating] = useState(false);
-  const [pages, setPages] = useState<ColoringPage[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [pages, setPages] = useState<PhotoPage[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const abortRef = useRef(false);
 
-  const selectedPages = pages.filter((p) => p.selected);
-
-  const handleExportPdf = useCallback(() => {
-    const toExport = selectedPages.length > 0 ? selectedPages : pages;
-    if (toExport.length === 0) return;
-
-    let loaded = 0;
-    const images: { img: HTMLImageElement; src: string }[] = [];
-
-    toExport.forEach((page, i) => {
-      const img = new Image();
-      img.onload = () => {
-        images[i] = { img, src: page.image };
-        loaded++;
-        if (loaded === toExport.length) {
-          const first = images[0].img;
-          const isLandscape = first.width > first.height;
-          const orientation = isLandscape ? "landscape" : "portrait";
-          const pdf = new jsPDF({ orientation, unit: "in", format: "letter" });
-
-          images.forEach(({ img: im, src }, idx) => {
-            if (idx > 0) {
-              const land = im.width > im.height;
-              pdf.addPage("letter", land ? "landscape" : "portrait");
-            }
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
-            const scale = Math.min(pageW / im.width, pageH / im.height);
-            const w = im.width * scale;
-            const h = im.height * scale;
-            const x = (pageW - w) / 2;
-            const y = (pageH - h) / 2;
-            pdf.addImage(src, "PNG", x, y, w, h);
-          });
-
-          pdf.save("coloring-book.pdf");
-        }
-      };
-      img.src = page.image;
-    });
-  }, [pages, selectedPages]);
+  const completedCount = pages.filter((p) => p.status === "done").length;
+  const totalCount = pages.length;
 
   async function handleGenerate() {
-    if (!photo) return;
+    if (photos.length === 0) return;
 
+    abortRef.current = false;
     setGenerating(true);
-    setError(null);
 
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo, age, variationIndex: pages.length }),
-      });
+    // Initialize pages from uploaded photos
+    const initial: PhotoPage[] = photos.map((photo) => ({
+      originalPhoto: photo,
+      coloringImage: null,
+      status: "pending" as const,
+    }));
+    setPages(initial);
+    setCurrentIndex(0);
 
-      const data = await response.json();
+    // Generate sequentially
+    for (let i = 0; i < photos.length; i++) {
+      if (abortRef.current) break;
 
-      if (!response.ok) {
-        setError(data.error || "Failed to generate coloring page");
-        return;
+      setCurrentIndex(i);
+      setPages((prev) =>
+        prev.map((p, idx) => (idx === i ? { ...p, status: "generating" } : p))
+      );
+
+      try {
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ photo: photos[i], age, variationIndex: i }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setPages((prev) =>
+            prev.map((p, idx) =>
+              idx === i
+                ? {
+                    ...p,
+                    status: "error",
+                    error: data.error || "Failed to generate",
+                  }
+                : p
+            )
+          );
+        } else {
+          setPages((prev) =>
+            prev.map((p, idx) =>
+              idx === i
+                ? { ...p, status: "done", coloringImage: data.image }
+                : p
+            )
+          );
+        }
+      } catch {
+        setPages((prev) =>
+          prev.map((p, idx) =>
+            idx === i
+              ? { ...p, status: "error", error: "Network error" }
+              : p
+          )
+        );
       }
-
-      setPages((prev) => [...prev, { image: data.image, selected: true }]);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setGenerating(false);
     }
-  }
 
-  function togglePageSelection(index: number) {
-    setPages((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p))
-    );
+    setGenerating(false);
   }
 
   return (
@@ -118,124 +115,123 @@ export default function CreateFromPhotos() {
             Create from Photos
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
-            Upload a family photo and we&apos;ll turn it into an age-appropriate coloring page
+            Upload multiple photos and we&apos;ll turn each one into a coloring
+            page
           </p>
         </header>
 
         {/* Upload + Age */}
-        <div className="space-y-4 sm:space-y-6">
-          <PhotoUpload photo={photo} onPhotoChange={setPhoto} />
-          <AgeSelector age={age} onAgeChange={setAge} />
-        </div>
+        {!generating && pages.length === 0 && (
+          <div className="space-y-4 sm:space-y-6">
+            <MultiPhotoUpload photos={photos} onPhotosChange={setPhotos} />
+            <AgeSelector age={age} onAgeChange={setAge} />
+          </div>
+        )}
 
         {/* Generate Button */}
-        <Button
-          className="w-full transition-all duration-200"
-          size="lg"
-          disabled={!photo || generating}
-          onClick={handleGenerate}
-        >
-          {generating ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              Generating&hellip;
-            </>
-          ) : pages.length === 0 ? (
-            "Generate Coloring Page"
-          ) : (
-            "Generate Another Variation"
-          )}
-        </Button>
+        {!generating && pages.length === 0 && (
+          <Button
+            className="w-full transition-all duration-200"
+            size="lg"
+            disabled={photos.length === 0}
+            onClick={handleGenerate}
+          >
+            Generate Coloring Book ({photos.length} photo
+            {photos.length !== 1 ? "s" : ""})
+          </Button>
+        )}
 
-        {/* Loading Skeleton */}
+        {/* Progress */}
         {generating && (
-          <Card className="animate-in fade-in duration-300">
-            <CardContent className="p-3 space-y-2">
-              <Skeleton className="aspect-square w-full rounded-lg" />
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-8 w-16 rounded-md" />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Error */}
-        {error && (
-          <Card className="border-destructive animate-in fade-in duration-300">
-            <CardContent className="p-6">
-              <p className="text-destructive text-center text-sm">{error}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Results */}
-        {pages.length > 0 && !generating && (
-          <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {pages.length} page{pages.length !== 1 ? "s" : ""} generated
-                {selectedPages.length > 0 && selectedPages.length < pages.length
-                  ? ` · ${selectedPages.length} selected`
-                  : ""}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportPdf}
-                className="transition-all duration-200"
-              >
-                <FileDown className="size-4" />
-                Export PDF
-                {selectedPages.length > 0 && selectedPages.length < pages.length
-                  ? ` (${selectedPages.length})`
-                  : ""}
-              </Button>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Converting photo {currentIndex + 1} of {totalCount}
+              </span>
+              <span className="font-medium">
+                {completedCount} of {totalCount} done
+              </span>
             </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${(completedCount / totalCount) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
 
-            <div
-              className={`grid gap-3 sm:gap-4 ${
-                pages.length === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
-              }`}
-            >
+        {/* Results grid */}
+        {pages.length > 0 && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {pages.map((page, index) => (
-                <Card
-                  key={index}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    page.selected
-                      ? "ring-2 ring-primary"
-                      : "opacity-60 hover:opacity-80"
-                  }`}
-                  onClick={() => togglePageSelection(index)}
-                >
-                  <CardContent className="p-3 space-y-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={page.image}
-                      alt={`Coloring page ${index + 1}`}
-                      className="w-full rounded-lg border"
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Page {index + 1}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        className="transition-colors duration-200"
-                      >
-                        <a href={page.image} download={`coloring-page-${index + 1}.png`}>
-                          <Download className="size-3" />
-                          PNG
-                        </a>
-                      </Button>
+                <Card key={index} className="overflow-hidden py-0">
+                  <CardContent className="p-0">
+                    {/* Original photo thumbnail */}
+                    <div className="grid grid-cols-2 gap-0">
+                      {/* Original */}
+                      <div className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={page.originalPhoto}
+                          alt={`Original photo ${index + 1}`}
+                          className="w-full aspect-square object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          Original
+                        </span>
+                      </div>
+
+                      {/* Coloring page or skeleton */}
+                      <div className="relative bg-muted">
+                        {page.status === "done" && page.coloringImage ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={page.coloringImage}
+                              alt={`Coloring page ${index + 1}`}
+                              className="w-full aspect-square object-cover"
+                            />
+                            <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                              Coloring Page
+                            </span>
+                          </>
+                        ) : page.status === "error" ? (
+                          <div className="w-full aspect-square flex items-center justify-center p-2">
+                            <p className="text-xs text-destructive text-center">
+                              {page.error || "Failed"}
+                            </p>
+                          </div>
+                        ) : page.status === "generating" ? (
+                          <div className="w-full aspect-square flex items-center justify-center">
+                            <div className="text-center space-y-2">
+                              <Loader2 className="size-6 animate-spin mx-auto text-muted-foreground" />
+                              <p className="text-xs text-muted-foreground">
+                                Generating…
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <Skeleton className="w-full aspect-square rounded-none" />
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Done message */}
+            {!generating && completedCount > 0 && (
+              <p className="text-sm text-muted-foreground text-center">
+                {completedCount} coloring page{completedCount !== 1 ? "s" : ""}{" "}
+                generated — continue to the book preview to reorder, edit, and
+                export as PDF.
+              </p>
+            )}
           </div>
         )}
 

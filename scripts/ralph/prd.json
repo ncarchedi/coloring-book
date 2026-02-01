@@ -297,7 +297,7 @@
         "npm run build passes"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse the existing photo-to-coloring-page API logic but call it once per photo. The upload zone should clearly indicate multi-select is supported."
     },
     {
