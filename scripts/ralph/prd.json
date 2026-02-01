@@ -348,7 +348,7 @@
         "npm run build passes"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": "Make sure the app feels cohesive — the new multi-page flows should share the same design language as the existing UI."
     }
   ]

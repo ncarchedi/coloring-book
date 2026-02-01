@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, Palette } from "lucide-react";
 
@@ -22,20 +19,17 @@ const options = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-start justify-center bg-background px-4 py-8 sm:py-16">
-      <main className="w-full max-w-2xl space-y-8 sm:space-y-10">
-        {/* Header */}
-        <header className="relative space-y-2 text-center">
-          <div className="absolute right-0 top-0">
-            <ThemeToggle />
-          </div>
+    <div className="flex min-h-[calc(100vh-3.5rem)] items-start justify-center px-4 py-8 sm:py-16">
+      <div className="w-full max-w-2xl space-y-8 sm:space-y-10">
+        {/* Hero */}
+        <div className="space-y-2 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Coloring Book Generator
+            Create a Coloring Book
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
             Create age-appropriate coloring books from themes or family photos
           </p>
-        </header>
+        </div>
 
         {/* Options */}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -62,7 +56,7 @@ export default function Home() {
             Powered by OpenAI &middot; Photos are never stored
           </p>
         </footer>
-      </main>
+      </div>
     </div>
   );
 }

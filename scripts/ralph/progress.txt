@@ -126,3 +126,19 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Always use `resolvedTheme` from next-themes when comparing theme values, not `theme` (which can be "system")
   - `theme` is the user's preference string; `resolvedTheme` is the actual applied theme
 ---
+
+## 2026-02-01 - US-021
+- Created shared Navbar component (`src/components/navbar.tsx`) with sticky header, app title/home link, back button on sub-pages, and theme toggle
+- Added Navbar to root layout (`src/app/layout.tsx`) so it's consistent across all pages
+- Removed per-page header sections (absolute-positioned back buttons + theme toggles) from all 4 pages
+- Changed all pages from `min-h-screen` to `min-h-[calc(100vh-3.5rem)]` to account for navbar height
+- Changed `<main>` wrappers to `<div>` since root layout now wraps children in `<main>`
+- Removed unused imports (Link, ThemeToggle, ArrowLeft, useRouter) from pages that no longer need them
+- Files changed: src/components/navbar.tsx (new), src/app/layout.tsx, src/app/page.tsx, src/app/create/theme/page.tsx, src/app/create/photos/page.tsx, src/app/preview/page.tsx
+- Verified in browser: navbar renders on all pages, back button shows on sub-pages only, dark/light toggle works, mobile responsive at 375px
+- **Learnings for future iterations:**
+  - Sticky navbar with `bg-background/95 backdrop-blur` gives a polished glassmorphism effect
+  - `supports-[backdrop-filter]:bg-background/60` provides progressive enhancement for backdrop-blur
+  - Using `min-h-[calc(100vh-3.5rem)]` (3.5rem = h-14 navbar) ensures content fills below navbar
+  - Back button uses `router.back()` for natural browser history navigation
+---

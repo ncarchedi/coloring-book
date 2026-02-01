@@ -2,16 +2,13 @@
 
 import { useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { jsPDF } from "jspdf";
 import { useColoringBook } from "@/context/coloring-book-context";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ArrowLeft,
   ArrowUp,
   ArrowDown,
   Download,
@@ -20,7 +17,6 @@ import {
 } from "lucide-react";
 
 export default function BookPreview() {
-  const router = useRouter();
   const { title, pages, setTitle, removePage, reorderPages } =
     useColoringBook();
 
@@ -97,7 +93,7 @@ export default function BookPreview() {
 
   if (pages.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
             No pages yet. Generate some coloring pages first!
@@ -111,25 +107,17 @@ export default function BookPreview() {
   }
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-background px-4 py-8 sm:py-12">
-      <main className="w-full max-w-2xl space-y-6 sm:space-y-8">
-        {/* Header */}
-        <header className="relative space-y-1 text-center">
-          <div className="absolute left-0 top-0">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="size-4" />
-            </Button>
-          </div>
-          <div className="absolute right-0 top-0">
-            <ThemeToggle />
-          </div>
+    <div className="flex min-h-[calc(100vh-3.5rem)] items-start justify-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-2xl space-y-6 sm:space-y-8">
+        {/* Page Title */}
+        <div className="space-y-1 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Book Preview
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
             Reorder, remove pages, and export your coloring book
           </p>
-        </header>
+        </div>
 
         {/* Book Title */}
         <Card>
@@ -241,7 +229,7 @@ export default function BookPreview() {
             Powered by OpenAI &middot; All generation happens via AI
           </p>
         </footer>
-      </main>
+      </div>
     </div>
   );
 }
