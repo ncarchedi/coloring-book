@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { jsPDF } from "jspdf";
 import { useColoringBook } from "@/context/coloring-book-context";
 import { AgeSelector } from "@/components/age-selector";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { BookOpen, Dices, Download, FileDown, Loader2, Sparkles } from "lucide-react";
+import { BookOpen, Dices, Download, Loader2, Sparkles } from "lucide-react";
 
 interface GeneratedPage {
   image: string;
@@ -51,48 +50,6 @@ export default function CreateFromTheme() {
   const selectedPages = pages.filter((p) => p.selected && p.image);
   const successPages = pages.filter((p) => p.image);
 
-  const handleExportPdf = useCallback(() => {
-    const toExport = selectedPages.length > 0 ? selectedPages : pages.filter((p) => p.image);
-    if (toExport.length === 0) return;
-
-    let loaded = 0;
-    const images: { img: HTMLImageElement; src: string }[] = [];
-
-    toExport.forEach((page, i) => {
-      const img = new Image();
-      img.onload = () => {
-        images[i] = { img, src: page.image };
-        loaded++;
-        if (loaded === toExport.length) {
-          const first = images[0].img;
-          const isLandscape = first.width > first.height;
-          const orientation = isLandscape ? "landscape" : "portrait";
-          const pdf = new jsPDF({ orientation, unit: "in", format: "letter" });
-
-          images.forEach(({ img: im, src }, idx) => {
-            if (idx > 0) {
-              const land = im.width > im.height;
-              pdf.addPage("letter", land ? "landscape" : "portrait");
-            }
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
-            const margin = 0.5;
-            const printW = pageW - margin * 2;
-            const printH = pageH - margin * 2;
-            const scale = Math.min(printW / im.width, printH / im.height);
-            const w = im.width * scale;
-            const h = im.height * scale;
-            const x = (pageW - w) / 2;
-            const y = (pageH - h) / 2;
-            pdf.addImage(src, "PNG", x, y, w, h);
-          });
-
-          pdf.save("coloring-book.pdf");
-        }
-      };
-      img.src = page.image;
-    });
-  }, [pages, selectedPages]);
 
   async function handleGenerate() {
     if (!theme.trim()) return;
@@ -314,20 +271,6 @@ export default function CreateFromTheme() {
                   selectedPages.length < successPages.length &&
                   ` \u00b7 ${selectedPages.length} selected`}
               </p>
-              {hasAnyResults && !generating && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportPdf}
-                  className="transition-all duration-200"
-                >
-                  <FileDown className="size-4" />
-                  Export PDF
-                  {selectedPages.length > 0 && selectedPages.length < successPages.length
-                    ? ` (${selectedPages.length})`
-                    : ""}
-                </Button>
-              )}
             </div>
 
             {/* Progress bar */}

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function BookPreview() {
-  const { title, pages, setTitle, removePage, reorderPages } =
+  const { title, pages, removePage, reorderPages } =
     useColoringBook();
 
   const handleMoveUp = useCallback(
@@ -48,32 +48,14 @@ export default function BookPreview() {
           if (loaded === pages.length) {
             const pdf = new jsPDF({ unit: "in", format: "letter" });
 
-            if (title.trim()) {
-              const coverW = pdf.internal.pageSize.getWidth();
-              const coverH = pdf.internal.pageSize.getHeight();
-              pdf.setFontSize(36);
-              pdf.text(title.trim(), coverW / 2, coverH / 2, {
-                align: "center",
-              });
-              pdf.setFontSize(14);
-              pdf.setTextColor(128);
-              pdf.text("A Coloring Book", coverW / 2, coverH / 2 + 0.6, {
-                align: "center",
-              });
-              pdf.setTextColor(0);
-            }
-
             images.forEach(({ img: im, src }, idx) => {
-              if (idx > 0 || title.trim()) {
+              if (idx > 0) {
                 const land = im.width > im.height;
                 pdf.addPage("letter", land ? "landscape" : "portrait");
               }
               const pageW = pdf.internal.pageSize.getWidth();
               const pageH = pdf.internal.pageSize.getHeight();
-              const margin = 0.5;
-              const printW = pageW - margin * 2;
-              const printH = pageH - margin * 2;
-              const scale = Math.min(printW / im.width, printH / im.height);
+              const scale = Math.min(pageW / im.width, pageH / im.height);
               const w = im.width * scale;
               const h = im.height * scale;
               const x = (pageW - w) / 2;
@@ -126,24 +108,6 @@ export default function BookPreview() {
             Reorder, remove pages, and export your coloring book
           </p>
         </div>
-
-        {/* Book Title */}
-        <Card>
-          <CardContent className="space-y-2">
-            <Label htmlFor="book-title" className="text-sm font-medium">
-              Book Title (optional)
-            </Label>
-            <Input
-              id="book-title"
-              placeholder="My Coloring Book"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Appears as a cover page in the exported PDF
-            </p>
-          </CardContent>
-        </Card>
 
         {/* Pages */}
         <div className="space-y-3">
