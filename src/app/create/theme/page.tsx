@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { BookOpen, Download, FileDown, Loader2, Sparkles } from "lucide-react";
+import { BookOpen, Dices, Download, FileDown, Loader2, Sparkles } from "lucide-react";
 
 interface GeneratedPage {
   image: string;
@@ -28,10 +28,25 @@ export default function CreateFromTheme() {
   const [age, setAge] = useState(3);
   const [pageCount, setPageCount] = useState(6);
   const [generating, setGenerating] = useState(false);
+  const [surpriseLoading, setSurpriseLoading] = useState(false);
   const [pages, setPages] = useState<GeneratedPage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0, phase: "" });
   const abortRef = useRef(false);
+
+  const handleSurpriseMe = async () => {
+    setSurpriseLoading(true);
+    try {
+      const res = await fetch("/api/surprise-theme", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to generate theme");
+      const data = await res.json();
+      setTheme(data.theme);
+    } catch {
+      // silently fail — user can just type their own theme
+    } finally {
+      setSurpriseLoading(false);
+    }
+  };
 
   const selectedPages = pages.filter((p) => p.selected && p.image);
   const successPages = pages.filter((p) => p.image);
@@ -202,9 +217,24 @@ export default function CreateFromTheme() {
         {/* Theme Input */}
         <Card>
           <CardContent className="space-y-3">
-            <Label htmlFor="theme-input" className="text-sm font-medium">
-              Theme Description
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="theme-input" className="text-sm font-medium">
+                Theme Description
+              </Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSurpriseMe}
+                disabled={surpriseLoading || generating}
+              >
+                {surpriseLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Dices className="h-4 w-4" />
+                )}
+                {surpriseLoading ? "Thinking..." : "Surprise Me"}
+              </Button>
+            </div>
             <Textarea
               id="theme-input"
               placeholder="e.g. underwater ocean adventure, dinosaurs in space, magical fairy garden..."
@@ -230,9 +260,9 @@ export default function CreateFromTheme() {
             </div>
             <Slider
               id="page-count-slider"
-              min={2}
+              min={1}
               max={10}
-              step={2}
+              step={1}
               value={[pageCount]}
               onValueChange={([v]) => setPageCount(v)}
             />

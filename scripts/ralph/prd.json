@@ -400,6 +400,26 @@
       "priority": 24,
       "passes": true,
       "notes": "This ensures that even if older or differently-sized images are in the book, the PDF output always looks good on letter paper."
+    },
+    {
+      "id": "US-025",
+      "title": "Surprise Me button for theme-based coloring book",
+      "description": "As a user, I want a 'Surprise Me' button on the theme-based creation page that picks a random fun theme and fills in the theme text box, so I can get inspired without having to think of a theme myself.",
+      "acceptanceCriteria": [
+        "A 'Surprise Me' button is displayed near the theme text input on the theme-based creation page",
+        "Clicking it calls an API route that uses an LLM (GPT-4o) to generate a creative, fun, kid-friendly coloring book theme",
+        "API route POST /api/surprise-theme returns a single theme string",
+        "The prompt should instruct the LLM to be creative and varied — themes should be imaginative and appealing to kids (e.g. 'underwater ocean adventure', 'dinosaurs having a tea party')",
+        "The returned theme is filled into the theme textarea",
+        "The filled-in text is fully editable — the user can modify it before generating",
+        "Shows a brief loading state on the button while the LLM call is in progress",
+        "The button has a subtle icon (e.g. a dice or sparkle) and fits the existing UI style",
+        "npm run build passes",
+        "Verify in browser via Playwright MCP: navigate to theme-based creation page, click Surprise Me, confirm loading state appears, confirm theme text fills in, confirm text is editable"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "Uses an LLM call to generate themes dynamically rather than picking from a fixed list. Keep the prompt simple — ask for a single short creative theme suitable for a kids coloring book."
     }
   ]
 }
