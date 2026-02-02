@@ -10,20 +10,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   ArrowUp,
   ArrowDown,
   Download,
   FileDown,
-  Mail,
   Trash2,
 } from "lucide-react";
 
@@ -109,38 +99,6 @@ export default function BookPreview() {
     );
   }, [pages, title, buildPdf]);
 
-  const [emailOpen, setEmailOpen] = useState(false);
-  const [emailAddr, setEmailAddr] = useState("");
-  const [sending, setSending] = useState(false);
-
-  const handleEmail = useCallback(async () => {
-    if (!emailAddr || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddr)) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-    setSending(true);
-    try {
-      const pdf = await buildPdf();
-      const pdfBlob = pdf.output("blob");
-
-      const formData = new FormData();
-      formData.append("email", emailAddr);
-      formData.append("title", title.trim() || "Your Coloring Book");
-      formData.append("pdf", pdfBlob, "coloring-book.pdf");
-
-      const res = await fetch("/api/email", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send email.");
-      toast.success("Email sent! Check your inbox.");
-      setEmailOpen(false);
-      setEmailAddr("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send email.");
-    } finally {
-      setSending(false);
-    }
-  }, [emailAddr, buildPdf, title]);
-
   if (pages.length === 0) {
     return (
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
@@ -194,44 +152,6 @@ export default function BookPreview() {
               {pages.length} page{pages.length !== 1 ? "s" : ""}
             </p>
             <div className="flex gap-2">
-              <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="transition-all duration-200"
-                  >
-                    <Mail className="size-4" />
-                    Email Book
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Email Coloring Book</DialogTitle>
-                    <DialogDescription>
-                      Send the coloring book PDF to an email address.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-2">
-                    <Label htmlFor="email-input">Email address</Label>
-                    <Input
-                      id="email-input"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={emailAddr}
-                      onChange={(e) => setEmailAddr(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEmail();
-                      }}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleEmail} disabled={sending}>
-                      {sending ? "Sending…" : "Send"}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
               <Button
                 size="sm"
                 onClick={handleExportPdf}
