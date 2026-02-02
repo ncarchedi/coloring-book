@@ -350,6 +350,26 @@
       "priority": 21,
       "passes": true,
       "notes": "Make sure the app feels cohesive — the new multi-page flows should share the same design language as the existing UI."
+    },
+    {
+      "id": "US-022",
+      "title": "Email coloring book PDF to a provided address",
+      "description": "As a user, I want to email the completed coloring book PDF to an email address I provide, so I can easily access it on another device (especially useful when generating on mobile).",
+      "acceptanceCriteria": [
+        "An 'Email Book' button appears alongside the Export PDF button on the book preview page",
+        "Clicking it opens a dialog/modal with an email address input field",
+        "Email input validates for a proper email format before sending",
+        "API route POST /api/email accepts the PDF (as base64) and a recipient email address",
+        "Uses a transactional email service (e.g. Resend, SendGrid, or Nodemailer with SMTP) to send the email with the PDF attached",
+        "Email subject line includes the book title (or 'Your Coloring Book' as default)",
+        "Shows a success toast/message after the email is sent",
+        "Shows an error message if sending fails",
+        "Email service credentials configured via environment variables (e.g. RESEND_API_KEY or SMTP config in .env.local)",
+        "npm run build passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "This is especially useful for mobile users who may not want to deal with downloading a PDF on their phone. Pick whichever email service is simplest to integrate — Resend is recommended for its simple API."
     }
   ]
 }
