@@ -152,3 +152,12 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - gpt-image-1 supports sizes: 1024x1024, 1024x1536, 1536x1024, auto
   - 1024x1536 is the best portrait option for letter-size paper
 ---
+
+## 2026-02-01 - US-024
+- Added 0.5-inch margins to PDF export scaling in both preview/page.tsx and create/theme/page.tsx
+- Images are now scaled to fit within printable area (7.5x10 inches on letter) while preserving aspect ratio
+- Centering logic unchanged — images centered on the full page (margins are symmetric so this works)
+- Files changed: src/app/preview/page.tsx, src/app/create/theme/page.tsx
+- **Learnings for future iterations:**
+  - PDF margin approach: subtract margin*2 from page dimensions for scaling, but center on full page
+---

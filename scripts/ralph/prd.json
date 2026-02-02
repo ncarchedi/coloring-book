@@ -398,7 +398,7 @@
         "npm run build passes"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": "This ensures that even if older or differently-sized images are in the book, the PDF output always looks good on letter paper."
     }
   ]

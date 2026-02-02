@@ -80,7 +80,10 @@ export default function BookPreview() {
               }
               const pageW = pdf.internal.pageSize.getWidth();
               const pageH = pdf.internal.pageSize.getHeight();
-              const scale = Math.min(pageW / im.width, pageH / im.height);
+              const margin = 0.5;
+              const printW = pageW - margin * 2;
+              const printH = pageH - margin * 2;
+              const scale = Math.min(printW / im.width, printH / im.height);
               const w = im.width * scale;
               const h = im.height * scale;
               const x = (pageW - w) / 2;
