@@ -368,8 +368,38 @@
         "npm run build passes"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": "This is especially useful for mobile users who may not want to deal with downloading a PDF on their phone. Pick whichever email service is simplest to integrate — Resend is recommended for its simple API."
+    },
+    {
+      "id": "US-023",
+      "title": "Generate coloring page images sized for 8.5x11 paper",
+      "description": "As a user, I want generated coloring page images to have portrait proportions that fit nicely on a standard 8.5x11 (letter size) page, so they print well without awkward cropping or whitespace.",
+      "acceptanceCriteria": [
+        "All image generation calls (both theme-based and photo-based) request images with a portrait aspect ratio that matches 8.5x11 proportions (e.g. 1024x1320 or the closest supported size)",
+        "If the image generation API does not support exact 8.5:11 ratios, use the closest tall/portrait option available and document the choice",
+        "Update the generation prompts to instruct the model to compose the artwork to fill the full frame with no large empty margins",
+        "Generated images display correctly in the preview grid without distortion",
+        "npm run build passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Currently generated images may be square or landscape, which wastes space when placed on a letter-size PDF page. The fix should apply to both the theme-based (/api/generate-theme) and photo-based (/api/generate) endpoints."
+    },
+    {
+      "id": "US-024",
+      "title": "Fit coloring page images properly on letter-size PDF pages",
+      "description": "As a user, I want each coloring page image to be scaled and centered to fill a standard 8.5x11 PDF page with appropriate margins, regardless of the image's original dimensions.",
+      "acceptanceCriteria": [
+        "PDF export scales each image to fit within the printable area of an 8.5x11 page (with small margins, e.g. 0.5 inches)",
+        "Images are centered on the page both horizontally and vertically",
+        "Aspect ratio of the image is preserved (no stretching/distortion)",
+        "Works correctly for both portrait and landscape source images",
+        "npm run build passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "This ensures that even if older or differently-sized images are in the book, the PDF output always looks good on letter paper."
     }
   ]
 }

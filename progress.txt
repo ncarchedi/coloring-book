@@ -103,3 +103,19 @@
   - jsPDF cover page: use `pdf.text()` with `align: "center"` at page midpoint, then `pdf.addPage()` for subsequent content pages
   - Can't easily inject data into React context from Playwright for testing — full flow verification requires API key
 ---
+
+## 2026-02-01 - US-022
+- Re-implemented email feature (previously added then removed due to 413 body size issues)
+- Created POST `/api/email` route using Resend SDK with FormData upload (avoids base64 body size limits)
+- Client sends PDF as a Blob via FormData instead of base64 string — prevents 413 errors
+- Added "Email Book" button with shadcn Dialog on the preview page, next to Export PDF
+- Installed `resend` and `sonner` packages; added Toaster to root layout
+- Email validation on both client and server side
+- Toast notifications for success/error via sonner
+- Files changed: `src/app/api/email/route.ts` (new), `src/app/preview/page.tsx`, `src/app/layout.tsx`, `package.json`
+- **Learnings for future iterations:**
+  - Use FormData with Blob for PDF uploads to avoid body size limits (413 errors) — don't send base64 in JSON body
+  - Resend SDK accepts `Buffer` for attachment content — convert from `File.arrayBuffer()`
+  - Configure `RESEND_API_KEY` and optionally `RESEND_FROM_EMAIL` in `.env.local`
+  - Playwright MCP can't launch when Chrome is already running with the same user data dir
+---

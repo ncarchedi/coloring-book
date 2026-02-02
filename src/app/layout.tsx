@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ColoringBookProvider } from "@/context/coloring-book-context";
 import { Navbar } from "@/components/navbar";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ColoringBookProvider>
             <Navbar />
             <main>{children}</main>
+            <Toaster richColors />
           </ColoringBookProvider>
         </ThemeProvider>
       </body>
