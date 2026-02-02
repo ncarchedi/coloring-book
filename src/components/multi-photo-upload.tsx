@@ -17,6 +17,29 @@ interface MultiPhotoUploadProps {
 }
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_DIMENSION = 1536;
+const JPEG_QUALITY = 0.8;
+
+function resizeImage(dataUrl: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        const scale = MAX_DIMENSION / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+    };
+    img.src = dataUrl;
+  });
+}
 
 export function MultiPhotoUpload({
   photos,
@@ -37,8 +60,9 @@ export function MultiPhotoUpload({
 
       validFiles.forEach((file, i) => {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          results[i] = e.target?.result as string;
+        reader.onload = async (e) => {
+          const raw = e.target?.result as string;
+          results[i] = await resizeImage(raw);
           loaded++;
           if (loaded === validFiles.length) {
             onPhotosChange([...photos, ...results]);
