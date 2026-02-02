@@ -10,21 +10,26 @@ export async function POST(request: Request) {
     );
   }
 
-  let pdf: string | undefined;
+  let pdfBase64: string;
   let email: string | undefined;
   let title: string | undefined;
 
   try {
     const formData = await request.formData();
-    pdf = formData.get("pdf") as string | undefined;
+    const pdfField = formData.get("pdf");
     email = formData.get("email") as string | undefined;
     title = formData.get("title") as string | undefined;
+
+    if (pdfField instanceof File) {
+      const buffer = Buffer.from(await pdfField.arrayBuffer());
+      pdfBase64 = buffer.toString("base64");
+    } else if (typeof pdfField === "string") {
+      pdfBase64 = pdfField;
+    } else {
+      return NextResponse.json({ error: "Missing pdf data" }, { status: 400 });
+    }
   } catch {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
-  }
-
-  if (!pdf || typeof pdf !== "string") {
-    return NextResponse.json({ error: "Missing pdf data" }, { status: 400 });
   }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
@@ -47,7 +52,7 @@ export async function POST(request: Request) {
       attachments: [
         {
           filename,
-          content: pdf,
+          content: pdfBase64,
           contentType: "application/pdf",
         },
       ],

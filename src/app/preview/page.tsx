@@ -119,9 +119,9 @@ export default function BookPreview() {
     setEmailError("");
     try {
       const pdf = await buildPdf();
-      const base64 = pdf.output("datauristring").split(",")[1];
+      const pdfBlob = pdf.output("blob");
       const formData = new FormData();
-      formData.append("pdf", base64);
+      formData.append("pdf", pdfBlob, "coloring-book.pdf");
       formData.append("email", email);
       if (title.trim()) formData.append("title", title.trim());
       const res = await fetch("/api/email", {
