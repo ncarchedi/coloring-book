@@ -90,13 +90,13 @@ export async function POST(request: NextRequest) {
 
     for (const scene of scenes) {
       try {
-        const imagePrompt = `Create a black and white coloring book page. Scene: ${scene}. Style: ${complexityPrompt}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons.`;
+        const imagePrompt = `Create a black and white coloring book page. Scene: ${scene}. Style: ${complexityPrompt}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons. Fill the entire frame with the artwork — no large empty margins.`;
 
         const imageResponse = await openai.images.generate({
           model: "gpt-image-1",
           prompt: imagePrompt,
           n: 1,
-          size: "1024x1024",
+          size: "1024x1536",
           quality: "medium",
         });
 

@@ -383,7 +383,7 @@
         "npm run build passes"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": "Currently generated images may be square or landscape, which wastes space when placed on a letter-size PDF page. The fix should apply to both the theme-based (/api/generate-theme) and photo-based (/api/generate) endpoints."
     },
     {

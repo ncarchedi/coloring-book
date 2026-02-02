@@ -142,3 +142,13 @@ Started: Sat Jan 31 14:16:11 MST 2026
   - Using `min-h-[calc(100vh-3.5rem)]` (3.5rem = h-14 navbar) ensures content fills below navbar
   - Back button uses `router.back()` for natural browser history navigation
 ---
+
+## 2026-02-01 - US-023
+- Changed image generation size from 1024x1024 to 1024x1536 (portrait) in both /api/generate and /api/generate-theme
+- Updated generation prompts to instruct "Fill the entire frame with the artwork — no large empty margins"
+- 1024x1536 is the closest supported gpt-image-1 portrait size to 8.5x11 proportions (ratio 2:3 ≈ 0.667 vs 8.5:11 ≈ 0.773)
+- Files changed: src/app/api/generate/route.ts, src/app/api/generate-theme/route.ts
+- **Learnings for future iterations:**
+  - gpt-image-1 supports sizes: 1024x1024, 1024x1536, 1536x1024, auto
+  - 1024x1536 is the best portrait option for letter-size paper
+---

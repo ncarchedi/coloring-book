@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     const styleVariation = variationStyles[variationIndex % variationStyles.length];
 
-    const imagePrompt = `Convert this photo into a black and white coloring book page. Scene context: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons. Preserve the composition, poses, and key details of the original photo.`;
+    const imagePrompt = `Convert this photo into a black and white coloring book page. Scene context: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons. Preserve the composition, poses, and key details of the original photo. Fill the entire frame with the artwork — no large empty margins.`;
 
     // Convert base64 photo to a File for the image edit API
     const imageBuffer = Buffer.from(base64Data, "base64");
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       image: imageFile,
       prompt: imagePrompt,
       n: 1,
-      size: "1024x1024",
+      size: "1024x1536",
       quality: "medium",
     });
 
