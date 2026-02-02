@@ -174,7 +174,7 @@ export default function BookPreview() {
                   <img
                     src={page.image}
                     alt={`Page ${index + 1}`}
-                    className="w-full aspect-square object-contain bg-white"
+                    className="w-full aspect-[2/3] object-contain bg-white"
                   />
                   {/* Page number */}
                   <div className="px-2 py-1.5 flex items-center justify-between">

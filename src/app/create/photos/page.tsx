@@ -178,7 +178,7 @@ export default function CreateFromPhotos() {
                         <img
                           src={page.originalPhoto}
                           alt={`Original photo ${index + 1}`}
-                          className="w-full aspect-square object-cover"
+                          className="w-full aspect-[2/3] object-cover"
                         />
                         <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
                           Original
@@ -193,20 +193,20 @@ export default function CreateFromPhotos() {
                             <img
                               src={page.coloringImage}
                               alt={`Coloring page ${index + 1}`}
-                              className="w-full aspect-square object-cover"
+                              className="w-full aspect-[2/3] object-cover"
                             />
                             <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
                               Coloring Page
                             </span>
                           </>
                         ) : page.status === "error" ? (
-                          <div className="w-full aspect-square flex items-center justify-center p-2">
+                          <div className="w-full aspect-[2/3] flex items-center justify-center p-2">
                             <p className="text-xs text-destructive text-center">
                               {page.error || "Failed"}
                             </p>
                           </div>
                         ) : page.status === "generating" ? (
-                          <div className="w-full aspect-square flex items-center justify-center">
+                          <div className="w-full aspect-[2/3] flex items-center justify-center">
                             <div className="text-center space-y-2">
                               <Loader2 className="size-6 animate-spin mx-auto text-muted-foreground" />
                               <p className="text-xs text-muted-foreground">
@@ -215,7 +215,7 @@ export default function CreateFromPhotos() {
                             </div>
                           </div>
                         ) : (
-                          <Skeleton className="w-full aspect-square rounded-none" />
+                          <Skeleton className="w-full aspect-[2/3] rounded-none" />
                         )}
                       </div>
                     </div>

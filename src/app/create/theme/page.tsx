@@ -361,9 +361,9 @@ export default function CreateFromTheme() {
                 >
                   <CardContent className="p-3 space-y-2">
                     {page.loading ? (
-                      <Skeleton className="aspect-square w-full rounded-lg" />
+                      <Skeleton className="aspect-[2/3] w-full rounded-lg" />
                     ) : page.error ? (
-                      <div className="aspect-square w-full rounded-lg bg-destructive/10 flex items-center justify-center">
+                      <div className="aspect-[2/3] w-full rounded-lg bg-destructive/10 flex items-center justify-center">
                         <p className="text-destructive text-xs text-center px-4">
                           Failed to generate: {page.error}
                         </p>
