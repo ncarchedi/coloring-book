@@ -120,13 +120,22 @@ export default function BookPreview() {
     try {
       const pdf = await buildPdf();
       const base64 = pdf.output("datauristring").split(",")[1];
+      const formData = new FormData();
+      formData.append("pdf", base64);
+      formData.append("email", email);
+      if (title.trim()) formData.append("title", title.trim());
       const res = await fetch("/api/email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdf: base64, email, title: title.trim() || undefined }),
+        body: formData,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send email");
+      if (!res.ok) {
+        let message = "Failed to send email";
+        try {
+          const data = await res.json();
+          message = data.error || message;
+        } catch { /* response wasn't JSON */ }
+        throw new Error(message);
+      }
       setEmailStatus("sent");
     } catch (err) {
       setEmailError(err instanceof Error ? err.message : "Failed to send email");

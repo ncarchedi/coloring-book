@@ -10,14 +10,18 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { pdf?: string; email?: string; title?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
+  let pdf: string | undefined;
+  let email: string | undefined;
+  let title: string | undefined;
 
-  const { pdf, email, title } = body;
+  try {
+    const formData = await request.formData();
+    pdf = formData.get("pdf") as string | undefined;
+    email = formData.get("email") as string | undefined;
+    title = formData.get("title") as string | undefined;
+  } catch {
+    return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+  }
 
   if (!pdf || typeof pdf !== "string") {
     return NextResponse.json({ error: "Missing pdf data" }, { status: 400 });
