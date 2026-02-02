@@ -63,10 +63,40 @@ export default function CreateFromPhotos() {
       );
 
       try {
+        // Step 1: Analyze the photo
+        const analyzeResponse = await fetch("/api/generate/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ photo: photos[i] }),
+        });
+
+        const analyzeData = await analyzeResponse.json();
+
+        if (!analyzeResponse.ok) {
+          setPages((prev) =>
+            prev.map((p, idx) =>
+              idx === i
+                ? {
+                    ...p,
+                    status: "error",
+                    error: analyzeData.error || "Failed to analyze photo",
+                  }
+                : p
+            )
+          );
+          continue;
+        }
+
+        // Step 2: Generate the coloring page
         const response = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ photo: photos[i], age, variationIndex: i }),
+          body: JSON.stringify({
+            photo: photos[i],
+            age,
+            description: analyzeData.description,
+            variationIndex: i,
+          }),
         });
 
         const data = await response.json();

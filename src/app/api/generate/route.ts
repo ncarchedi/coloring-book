@@ -14,7 +14,7 @@ function getComplexityPrompt(age: number): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { photo, age, variationIndex = 0 } = body;
+    const { photo, age, description, variationIndex = 0 } = body;
 
     if (!photo || typeof photo !== "string") {
       return NextResponse.json(
@@ -30,6 +30,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!description || typeof description !== "string") {
+      return NextResponse.json(
+        { error: "A description is required" },
+        { status: 400 }
+      );
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -40,7 +47,6 @@ export async function POST(request: NextRequest) {
 
     const openai = new OpenAI({ apiKey });
 
-    // Step 1: Analyze the photo with GPT-4o vision
     const base64Data = photo.includes(",") ? photo.split(",")[1] : photo;
     const mediaType = photo.startsWith("data:image/png")
       ? "image/png"
@@ -48,32 +54,6 @@ export async function POST(request: NextRequest) {
         ? "image/webp"
         : "image/jpeg";
 
-    const analysis = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Describe the main subjects and scene in this family photo in 2-3 sentences. Focus on the people, their activities, and the setting. Be specific but concise.",
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${mediaType};base64,${base64Data}`,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 300,
-    });
-
-    const description =
-      analysis.choices[0]?.message?.content ?? "a family scene";
-
-    // Step 2: Generate a coloring page with style variation
     const complexityPrompt = getComplexityPrompt(age);
 
     const variationStyles = [
@@ -89,7 +69,6 @@ export async function POST(request: NextRequest) {
 
     const imagePrompt = `Convert this photo into a black and white coloring book page. Scene context: ${description}. Style: ${complexityPrompt}. Artistic approach: ${styleVariation}. The image must be pure black outlines on a white background, no shading, no gray tones, no color — only clean line art suitable for coloring in with crayons. Preserve the composition, poses, and key details of the original photo. Fill the entire frame with the artwork — no large empty margins.`;
 
-    // Convert base64 photo to a File for the image edit API
     const imageBuffer = Buffer.from(base64Data, "base64");
     const extension = mediaType === "image/png" ? "png" : mediaType === "image/webp" ? "webp" : "jpg";
     const imageFile = await toFile(imageBuffer, `photo.${extension}`, { type: mediaType });
@@ -114,7 +93,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       image: `data:image/png;base64,${imageBase64}`,
-      description,
     });
   } catch (error) {
     console.error("Generation error:", error);
