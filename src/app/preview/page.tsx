@@ -9,31 +9,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   ArrowUp,
   ArrowDown,
   Download,
   FileDown,
-  Mail,
   Trash2,
 } from "lucide-react";
 
 export default function BookPreview() {
   const { title, pages, setTitle, removePage, reorderPages } =
     useColoringBook();
-
-  const [emailOpen, setEmailOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [emailStatus, setEmailStatus] = useState<
-    "idle" | "sending" | "sent" | "error"
-  >("idle");
-  const [emailError, setEmailError] = useState("");
 
   const handleMoveUp = useCallback(
     (index: number) => {
@@ -110,39 +95,6 @@ export default function BookPreview() {
     );
   }, [pages, title, buildPdf]);
 
-  const handleEmailSend = useCallback(async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-    setEmailStatus("sending");
-    setEmailError("");
-    try {
-      const pdf = await buildPdf();
-      const pdfBlob = pdf.output("blob");
-      const formData = new FormData();
-      formData.append("pdf", pdfBlob, "coloring-book.pdf");
-      formData.append("email", email);
-      if (title.trim()) formData.append("title", title.trim());
-      const res = await fetch("/api/email", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        let message = "Failed to send email";
-        try {
-          const data = await res.json();
-          message = data.error || message;
-        } catch { /* response wasn't JSON */ }
-        throw new Error(message);
-      }
-      setEmailStatus("sent");
-    } catch (err) {
-      setEmailError(err instanceof Error ? err.message : "Failed to send email");
-      setEmailStatus("error");
-    }
-  }, [email, title, buildPdf]);
-
   if (pages.length === 0) {
     return (
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
@@ -196,18 +148,6 @@ export default function BookPreview() {
               {pages.length} page{pages.length !== 1 ? "s" : ""}
             </p>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setEmailStatus("idle");
-                  setEmailError("");
-                  setEmailOpen(true);
-                }}
-              >
-                <Mail className="size-4" />
-                Email Book
-              </Button>
               <Button
                 size="sm"
                 onClick={handleExportPdf}
@@ -297,52 +237,6 @@ export default function BookPreview() {
         </footer>
       </div>
 
-      <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Email Coloring Book</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="email-input">Email address</Label>
-              <Input
-                id="email-input"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (emailError) setEmailError("");
-                }}
-                disabled={emailStatus === "sending"}
-              />
-            </div>
-            {emailError && (
-              <p className="text-sm text-destructive">{emailError}</p>
-            )}
-            {emailStatus === "sent" && (
-              <p className="text-sm text-green-600">
-                Email sent! Check your inbox.
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setEmailOpen(false)}
-              disabled={emailStatus === "sending"}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleEmailSend}
-              disabled={emailStatus === "sending" || emailStatus === "sent"}
-            >
-              {emailStatus === "sending" ? "Sending..." : "Send"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
