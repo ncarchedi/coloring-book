@@ -28,7 +28,6 @@ export default function LoginPage() {
 
       if (response.ok) {
         router.push("/");
-        router.refresh();
       } else {
         setError("Invalid password");
       }
